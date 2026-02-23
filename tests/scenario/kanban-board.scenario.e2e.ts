@@ -65,15 +65,10 @@ test.describe("UniKanban Board — Video Proofs", () => {
   });
 
   test("add a new card to a column", async ({ page }) => {
-    const backlogColumn = page
-      .locator("div")
-      .filter({ has: page.locator("h3", { hasText: "Backlog" }) })
-      .first();
+    const columns = page.locator("main > div > div").filter({ has: page.locator("h3") });
+    const backlogColumn = columns.filter({ hasText: "Backlog" });
 
-    const addCardButton = backlogColumn.getByRole("button", {
-      name: /add card/i,
-    });
-    await addCardButton.click();
+    await backlogColumn.getByRole("button", { name: /add card/i }).click();
     await settle(page);
 
     const input = backlogColumn.getByPlaceholder("Card title...");
@@ -89,22 +84,17 @@ test.describe("UniKanban Board — Video Proofs", () => {
   });
 
   test("delete a card from a column", async ({ page }) => {
-    const cardText = "Create GOALS.md";
-    const card = page
-      .locator("div")
-      .filter({ hasText: cardText })
-      .filter({ has: page.locator("h4") })
-      .first();
+    const cardTitle = page.locator("h4", { hasText: "Create GOALS.md" });
+    await expect(cardTitle).toBeVisible();
 
-    await expect(card).toBeVisible();
+    const card = cardTitle.locator("xpath=ancestor::div[contains(@class, 'group')]");
     await card.hover();
     await settle(page);
 
-    const deleteButton = card.getByRole("button", { name: "Delete card" });
-    await deleteButton.click();
+    await card.getByRole("button", { name: "Delete card" }).click();
     await settle(page);
 
-    await expect(page.getByText(cardText)).not.toBeVisible();
+    await expect(page.locator("h4", { hasText: "Create GOALS.md" })).not.toBeVisible();
     await breath(page);
   });
 
