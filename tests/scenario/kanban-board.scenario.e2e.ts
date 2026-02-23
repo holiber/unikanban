@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { breath, settle, hold, showCursor } from "../helpers.js";
+import { settle, hold, showCursor } from "../helpers.js";
 
-test.describe("UniKanban Board — Video Proofs", () => {
+test.describe("UniKanban Board — Light Mode Proofs", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
@@ -32,39 +32,10 @@ test.describe("UniKanban Board — Video Proofs", () => {
     await hold(page);
   });
 
-  test("theme toggle switches between light and dark mode", async ({
-    page,
-  }) => {
-    const themeButton = page.getByRole("button", { name: /switch to/i });
-    await expect(themeButton).toBeVisible();
-    await hold(page);
-
-    const html = page.locator("html");
-    const initialHasDark = await html.evaluate((el) =>
-      el.classList.contains("dark"),
-    );
-
-    await themeButton.click();
-    await settle(page);
-
-    const afterFirstToggle = await html.evaluate((el) =>
-      el.classList.contains("dark"),
-    );
-    expect(afterFirstToggle).toBe(!initialHasDark);
-    await hold(page);
-
-    await themeButton.click();
-    await settle(page);
-
-    const afterSecondToggle = await html.evaluate((el) =>
-      el.classList.contains("dark"),
-    );
-    expect(afterSecondToggle).toBe(initialHasDark);
-    await hold(page);
-  });
-
   test("add a new card to a column", async ({ page }) => {
-    const columns = page.locator("main > div > div").filter({ has: page.locator("h3") });
+    const columns = page
+      .locator("main > div > div")
+      .filter({ has: page.locator("h3") });
     const backlogColumn = columns.filter({ hasText: "Backlog" });
 
     await backlogColumn.getByRole("button", { name: /add card/i }).click();
@@ -79,22 +50,6 @@ test.describe("UniKanban Board — Video Proofs", () => {
     await settle(page);
 
     await expect(backlogColumn.getByText("My new test card")).toBeVisible();
-    await hold(page);
-  });
-
-  test("delete a card from a column", async ({ page }) => {
-    const cardTitle = page.locator("h4", { hasText: "Create GOALS.md" });
-    await expect(cardTitle).toBeVisible();
-    await settle(page);
-
-    const card = cardTitle.locator("xpath=ancestor::div[contains(@class, 'group')]");
-    await card.hover();
-    await hold(page);
-
-    await card.getByRole("button", { name: "Delete card" }).click();
-    await settle(page);
-
-    await expect(page.locator("h4", { hasText: "Create GOALS.md" })).not.toBeVisible();
     await hold(page);
   });
 
@@ -121,6 +76,55 @@ test.describe("UniKanban Board — Video Proofs", () => {
     await expect(columns).toHaveCount(5);
     await hold(page);
   });
+});
+
+test.describe("UniKanban Board — Dark Mode Proofs", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    await showCursor(page);
+    await settle(page);
+  });
+
+  test("theme toggle switches between dark and light mode", async ({
+    page,
+  }) => {
+    const html = page.locator("html");
+    await expect(html).toHaveClass(/dark/);
+    await hold(page);
+
+    const themeButton = page.getByRole("button", { name: /switch to/i });
+    await themeButton.click();
+    await settle(page);
+    await expect(html).not.toHaveClass(/dark/);
+    await hold(page);
+
+    await themeButton.click();
+    await settle(page);
+    await expect(html).toHaveClass(/dark/);
+    await hold(page);
+  });
+
+  test("delete a card from a column", async ({ page }) => {
+    const cardTitle = page.locator("h4", { hasText: "Create GOALS.md" });
+    await expect(cardTitle).toBeVisible();
+    await settle(page);
+
+    const card = cardTitle.locator(
+      "xpath=ancestor::div[contains(@class, 'group')]",
+    );
+    await card.hover();
+    await hold(page);
+
+    await card.getByRole("button", { name: "Delete card" }).click();
+    await settle(page);
+
+    await expect(
+      page.locator("h4", { hasText: "Create GOALS.md" }),
+    ).not.toBeVisible();
+    await hold(page);
+  });
 
   test("no console errors during interaction", async ({ page }) => {
     const consoleErrors: string[] = [];
@@ -141,16 +145,19 @@ test.describe("UniKanban Board — Video Proofs", () => {
     await themeButton.click();
     await hold(page);
 
-    const addCardButton = page.getByRole("button", { name: /add card/i }).first();
+    const addCardButton = page
+      .getByRole("button", { name: /add card/i })
+      .first();
     await addCardButton.click();
     await settle(page);
 
     const input = page.getByPlaceholder("Card title...");
     await input.fill("Console test card");
+    await hold(page);
     await input.press("Escape");
     await settle(page);
 
     expect(consoleErrors).toEqual([]);
-    await breath(page);
+    await hold(page);
   });
 });

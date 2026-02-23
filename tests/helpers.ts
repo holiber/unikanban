@@ -36,38 +36,65 @@ const CURSOR_INIT_SCRIPT = `
   Object.assign(cursor.style, {
     position: 'fixed',
     zIndex:   '999999',
-    width:    '20px',
-    height:   '20px',
+    width:    '40px',
+    height:   '40px',
     pointerEvents: 'none',
-    transition: 'transform 0.08s ease-out, background 0.15s',
-    transform: 'translate(-50%, -50%)',
+    left: '-100px',
+    top:  '-100px',
+    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))',
   });
   cursor.innerHTML = \`
-    <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 1L4 16L8.5 12L13 18L15 17L10.5 11L16 9L4 1Z"
-            fill="black" stroke="white" stroke-width="1.2" stroke-linejoin="round"/>
+    <svg width="40" height="40" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 1L3 19L8.5 13.5L13 22L16 20.5L11.5 12L18 10L3 1Z"
+            fill="#FF3B30" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
     </svg>
   \`;
   document.documentElement.appendChild(cursor);
 
+  const ring = document.createElement('div');
+  ring.id = 'pw-cursor-ring';
+  Object.assign(ring.style, {
+    position: 'fixed',
+    zIndex:   '999998',
+    width:    '32px',
+    height:   '32px',
+    borderRadius: '50%',
+    border:   '2px solid rgba(255, 59, 48, 0.5)',
+    pointerEvents: 'none',
+    transform: 'translate(-50%, -50%)',
+    transition: 'width 0.15s, height 0.15s, border-color 0.15s',
+    left: '-100px',
+    top:  '-100px',
+  });
+  document.documentElement.appendChild(ring);
+
   document.addEventListener('mousemove', (e) => {
     cursor.style.left = e.clientX + 'px';
     cursor.style.top  = e.clientY + 'px';
+    ring.style.left   = e.clientX + 'px';
+    ring.style.top    = e.clientY + 'px';
   }, { passive: true });
 
   document.addEventListener('mousedown', () => {
-    cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
+    ring.style.width  = '20px';
+    ring.style.height = '20px';
+    ring.style.borderColor = 'rgba(255, 59, 48, 0.9)';
   });
   document.addEventListener('mouseup', () => {
-    cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+    ring.style.width  = '32px';
+    ring.style.height = '32px';
+    ring.style.borderColor = 'rgba(255, 59, 48, 0.5)';
   });
 }
 `;
 
 /**
- * Injects a visible fake mouse cursor that follows pointer movements
- * and animates on click. Call once after page.goto().
+ * Injects a large, brightly-colored fake mouse cursor (red arrow + ring)
+ * that follows pointer movements and animates on click.
+ * Call once after page.goto() or page.reload().
  */
 export async function showCursor(page: Page): Promise<void> {
   await page.addScriptTag({ content: CURSOR_INIT_SCRIPT });
+  await page.mouse.move(640, 360);
+  await page.waitForTimeout(100);
 }
