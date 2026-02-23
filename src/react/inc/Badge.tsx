@@ -1,12 +1,4 @@
-import type { ReactNode } from "react";
-
-type BadgeVariant = "default" | "brand" | "success" | "warning" | "danger";
-
-interface BadgeProps {
-  variant?: BadgeVariant;
-  children: ReactNode;
-  className?: string;
-}
+import type { BadgeProps, BadgeVariant } from "../../inc/types.js";
 
 const variantClasses: Record<BadgeVariant, string> = {
   default: "bg-surface-tertiary text-text-secondary",

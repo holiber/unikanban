@@ -104,8 +104,7 @@ export function Board({ initial = DEMO_BOARD }: BoardProps) {
     }));
   }
 
-  function addColumn(e: React.FormEvent) {
-    e.preventDefault();
+  function handleAddColumn() {
     const title = newColTitle.trim();
     if (!title) return;
     setBoard((prev) => ({
@@ -114,6 +113,11 @@ export function Board({ initial = DEMO_BOARD }: BoardProps) {
     }));
     setNewColTitle("");
     setAddingColumn(false);
+  }
+
+  function handleCancelColumn() {
+    setAddingColumn(false);
+    setNewColTitle("");
   }
 
   return (
@@ -127,42 +131,28 @@ export function Board({ initial = DEMO_BOARD }: BoardProps) {
         />
       ))}
 
-      {/* Add column */}
       {addingColumn ? (
-        <form
-          onSubmit={addColumn}
+        <div
           className="flex w-72 shrink-0 flex-col gap-2 rounded-xl
             border border-dashed border-border-secondary bg-surface-secondary/50 p-4"
         >
           <Input
             placeholder="Column title..."
             value={newColTitle}
-            onChange={(e) => setNewColTitle(e.target.value)}
+            onChange={setNewColTitle}
+            onSubmit={handleAddColumn}
+            onEscape={handleCancelColumn}
             autoFocus
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                setAddingColumn(false);
-                setNewColTitle("");
-              }
-            }}
           />
           <div className="flex gap-2">
-            <Button type="submit" size="sm">
+            <Button onClick={handleAddColumn} size="sm">
               Add column
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setAddingColumn(false);
-                setNewColTitle("");
-              }}
-            >
+            <Button variant="ghost" size="sm" onClick={handleCancelColumn}>
               Cancel
             </Button>
           </div>
-        </form>
+        </div>
       ) : (
         <button
           onClick={() => setAddingColumn(true)}

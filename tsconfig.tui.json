@@ -1,9 +1,9 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "jsx": "react-jsx",
+    "outDir": "dist-tui",
     "rootDir": "src"
   },
-  "include": ["src"],
-  "exclude": ["src/react", "src/tui"]
+  "include": ["src/tui", "src/inc"]
 }

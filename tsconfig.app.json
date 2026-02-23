@@ -6,5 +6,5 @@
     "outDir": "dist-app",
     "noEmit": true
   },
-  "include": ["src/react"]
+  "include": ["src/react", "src/inc"]
 }

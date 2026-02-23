@@ -13,8 +13,7 @@ export function Column({ column, onAddCard, onDeleteCard }: ColumnProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit() {
     const title = newTitle.trim();
     if (!title) return;
     onAddCard(column.id, title);
@@ -22,12 +21,16 @@ export function Column({ column, onAddCard, onDeleteCard }: ColumnProps) {
     setIsAdding(false);
   }
 
+  function handleCancel() {
+    setIsAdding(false);
+    setNewTitle("");
+  }
+
   return (
     <div
       className="flex w-72 shrink-0 flex-col rounded-xl border border-border-primary
         bg-surface-secondary"
     >
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold text-text-primary">
@@ -37,7 +40,6 @@ export function Column({ column, onAddCard, onDeleteCard }: ColumnProps) {
         </div>
       </div>
 
-      {/* Cards */}
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3">
         {column.cards.map((card: KanbanCard) => (
           <CardItem
@@ -47,38 +49,25 @@ export function Column({ column, onAddCard, onDeleteCard }: ColumnProps) {
           />
         ))}
 
-        {/* Add card form */}
         {isAdding ? (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <Input
               placeholder="Card title..."
               value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
+              onChange={setNewTitle}
+              onSubmit={handleSubmit}
+              onEscape={handleCancel}
               autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Escape") {
-                  setIsAdding(false);
-                  setNewTitle("");
-                }
-              }}
             />
             <div className="flex gap-2">
-              <Button type="submit" size="sm">
+              <Button onClick={handleSubmit} size="sm">
                 Add
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setIsAdding(false);
-                  setNewTitle("");
-                }}
-              >
+              <Button variant="ghost" size="sm" onClick={handleCancel}>
                 Cancel
               </Button>
             </div>
-          </form>
+          </div>
         ) : (
           <button
             onClick={() => setIsAdding(true)}

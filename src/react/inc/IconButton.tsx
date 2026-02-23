@@ -1,10 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
-
-interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  label: string;
-  size?: "sm" | "md";
-  children: ReactNode;
-}
+import type { IconButtonProps } from "../../inc/types.js";
 
 const sizeClasses = {
   sm: "h-7 w-7 rounded-md",
@@ -26,7 +20,8 @@ export function IconButton({
         focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1
         disabled:pointer-events-none disabled:opacity-50
         ${sizeClasses[size]} ${className}`}
-      {...props}
+      onClick={props.onClick}
+      disabled={props.disabled}
     >
       {children}
     </button>

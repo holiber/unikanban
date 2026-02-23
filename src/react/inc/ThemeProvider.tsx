@@ -1,20 +1,6 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
-
-type Theme = "light" | "dark";
-
-interface ThemeContextValue {
-  theme: Theme;
-  toggle: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import type { Theme } from "../../inc/types.js";
+import { ThemeContext } from "../../inc/useTheme.js";
 
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") return "light";
@@ -44,10 +30,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       {children}
     </ThemeContext>
   );
-}
-
-export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
-  return ctx;
 }

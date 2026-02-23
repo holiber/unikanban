@@ -1,13 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
-
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
-type ButtonSize = "sm" | "md" | "lg";
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  children: ReactNode;
-}
+import type { ButtonProps, ButtonVariant, ButtonSize } from "../../inc/types.js";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
@@ -39,7 +30,9 @@ export function Button({
         transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1
         disabled:pointer-events-none disabled:opacity-50
         ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
-      {...props}
+      onClick={props.onClick}
+      disabled={props.disabled}
+      type={props.type}
     >
       {children}
     </button>
