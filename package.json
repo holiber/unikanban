@@ -1,7 +1,7 @@
 {
   "name": "unikanban",
   "version": "0.1.0",
-  "description": "A Kanban board built with the Unapi pattern — self-documented, type-safe, transport-agnostic APIs.",
+  "description": "A Kanban board built with the Unapi pattern \u2014 self-documented, type-safe, transport-agnostic APIs.",
   "type": "module",
   "exports": {
     ".": {
@@ -10,7 +10,9 @@
     }
   },
   "scripts": {
+    "dev": "vite",
     "build": "tsc",
+    "build:app": "vite build",
     "test": "pnpm run build && jabtrunner all --allow-missing-project",
     "test:unit": "jabtrunner unit",
     "test:e2e": "pnpm run build && jabtrunner e2e --allow-missing-project",
@@ -19,16 +21,29 @@
     "test:integration": "node -e \"console.log('No integration tests yet.')\""
   },
   "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "yargs": "^18.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
+    "@tailwindcss/vite": "^4.2.1",
     "@types/node": "^22",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@types/yargs": "^17",
+    "@vitejs/plugin-react": "^5.1.4",
     "jabtrunner": "https://github.com/holiber/jabterm/releases/download/jabtrunner-v0.1.0/jabtrunner-0.1.0.tgz",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5",
+    "vite": "^7.3.1",
     "vitest": "^3.2.0"
   },
   "packageManager": "pnpm@10.12.1",
-  "license": "MIT"
+  "license": "MIT",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
 }
