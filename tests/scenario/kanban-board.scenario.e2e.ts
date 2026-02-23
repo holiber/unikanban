@@ -1,10 +1,11 @@
 import { test, expect } from "@playwright/test";
-import { breath, settle } from "../helpers.js";
+import { breath, settle, hold, showCursor } from "../helpers.js";
 
 test.describe("UniKanban Board — Video Proofs", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
+    await showCursor(page);
     await settle(page);
   });
 
@@ -23,14 +24,12 @@ test.describe("UniKanban Board — Video Proofs", () => {
     await expect(page.getByText("Implement CLI wrapper")).toBeVisible();
     await expect(page.getByText("Project scaffolding")).toBeVisible();
     await expect(page.getByText("Create GOALS.md")).toBeVisible();
-    await breath(page);
 
     const badges = page.locator("span", { hasText: /^(high|medium|low)$/ });
     await expect(badges.first()).toBeVisible();
-    await breath(page);
 
     await expect(page.locator("body")).not.toHaveText(/error/i);
-    await settle(page);
+    await hold(page);
   });
 
   test("theme toggle switches between light and dark mode", async ({
@@ -38,7 +37,7 @@ test.describe("UniKanban Board — Video Proofs", () => {
   }) => {
     const themeButton = page.getByRole("button", { name: /switch to/i });
     await expect(themeButton).toBeVisible();
-    await settle(page);
+    await hold(page);
 
     const html = page.locator("html");
     const initialHasDark = await html.evaluate((el) =>
@@ -52,7 +51,7 @@ test.describe("UniKanban Board — Video Proofs", () => {
       el.classList.contains("dark"),
     );
     expect(afterFirstToggle).toBe(!initialHasDark);
-    await breath(page);
+    await hold(page);
 
     await themeButton.click();
     await settle(page);
@@ -61,7 +60,7 @@ test.describe("UniKanban Board — Video Proofs", () => {
       el.classList.contains("dark"),
     );
     expect(afterSecondToggle).toBe(initialHasDark);
-    await breath(page);
+    await hold(page);
   });
 
   test("add a new card to a column", async ({ page }) => {
@@ -74,28 +73,29 @@ test.describe("UniKanban Board — Video Proofs", () => {
     const input = backlogColumn.getByPlaceholder("Card title...");
     await expect(input).toBeVisible();
     await input.fill("My new test card");
-    await breath(page);
+    await hold(page);
 
     await backlogColumn.getByRole("button", { name: "Add" }).click();
     await settle(page);
 
     await expect(backlogColumn.getByText("My new test card")).toBeVisible();
-    await breath(page);
+    await hold(page);
   });
 
   test("delete a card from a column", async ({ page }) => {
     const cardTitle = page.locator("h4", { hasText: "Create GOALS.md" });
     await expect(cardTitle).toBeVisible();
+    await settle(page);
 
     const card = cardTitle.locator("xpath=ancestor::div[contains(@class, 'group')]");
     await card.hover();
-    await settle(page);
+    await hold(page);
 
     await card.getByRole("button", { name: "Delete card" }).click();
     await settle(page);
 
     await expect(page.locator("h4", { hasText: "Create GOALS.md" })).not.toBeVisible();
-    await breath(page);
+    await hold(page);
   });
 
   test("add a new column to the board", async ({ page }) => {
@@ -106,7 +106,7 @@ test.describe("UniKanban Board — Video Proofs", () => {
     const input = page.getByPlaceholder("Column title...");
     await expect(input).toBeVisible();
     await input.fill("Review");
-    await breath(page);
+    await hold(page);
 
     await page
       .locator("div")
@@ -119,7 +119,7 @@ test.describe("UniKanban Board — Video Proofs", () => {
 
     const columns = page.locator("h3");
     await expect(columns).toHaveCount(5);
-    await breath(page);
+    await hold(page);
   });
 
   test("no console errors during interaction", async ({ page }) => {
@@ -132,13 +132,14 @@ test.describe("UniKanban Board — Video Proofs", () => {
 
     await page.reload();
     await page.waitForLoadState("networkidle");
+    await showCursor(page);
     await settle(page);
 
     const themeButton = page.getByRole("button", { name: /switch to/i });
     await themeButton.click();
-    await settle(page);
+    await hold(page);
     await themeButton.click();
-    await settle(page);
+    await hold(page);
 
     const addCardButton = page.getByRole("button", { name: /add card/i }).first();
     await addCardButton.click();
