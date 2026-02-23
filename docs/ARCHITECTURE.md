@@ -1,0 +1,175 @@
+# Architecture
+
+## Project Structure
+
+```
+unikanban/
+├── src/
+│   ├── index.ts                  # Core library entry point
+│   ├── inc/                      # Shared component contracts (platform-agnostic)
+│   │   ├── types.ts              # ButtonProps, BadgeProps, InputProps, ThemeContextValue
+│   │   ├── kanban-types.ts       # KanbanBoard, KanbanColumn, KanbanCard
+│   │   ├── useTheme.ts           # ThemeContext + useTheme() hook
+│   │   └── index.ts              # Barrel re-export
+│   ├── react/                    # Web UI (React DOM + Tailwind CSS)
+│   │   ├── main.tsx              # Browser entry point
+│   │   ├── App.tsx               # Root component
+│   │   ├── index.css             # Tailwind + theme tokens (light/dark)
+│   │   ├── inc/                  # Web implementations of shared components
+│   │   │   ├── Button.tsx
+│   │   │   ├── Badge.tsx
+│   │   │   ├── IconButton.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── ThemeProvider.tsx  # localStorage + DOM class toggle
+│   │   │   ├── ThemeToggle.tsx    # SVG sun/moon icons
+│   │   │   └── index.ts
+│   │   └── kanban/               # Web Kanban board
+│   │       ├── Board.tsx
+│   │       ├── Column.tsx
+│   │       ├── CardItem.tsx
+│   │       └── types.ts          # Re-exports from src/inc/
+│   └── tui/                      # Terminal UI (Ink)
+│       ├── main.tsx              # TUI entry point
+│       ├── inc/                  # Ink implementations of shared components
+│       │   ├── Button.tsx
+│       │   ├── Badge.tsx
+│       │   ├── Input.tsx         # useInput() keyboard handling
+│       │   ├── ThemeProvider.tsx  # In-memory theme state
+│       │   ├── ThemeToggle.tsx    # Unicode sun/moon
+│       │   ├── theme-colors.ts   # Terminal color palettes
+│       │   └── index.ts
+│       └── kanban/               # TUI Kanban board
+│           ├── Board.tsx         # Keyboard navigation (hjkl / arrows)
+│           ├── Column.tsx
+│           └── CardItem.tsx
+├── tests/
+│   └── unit/
+│       └── hello.test.ts
+├── docs/
+│   ├── GOALS.md                  # Project vision, Unapi pattern
+│   ├── ARCHITECTURE.md           # This file
+│   └── IMPLEMENTATION_PLAN.md    # 3-tier implementation plan
+├── agents/
+│   └── testing-strategy.md       # AI agent testing contract
+├── AGENTS.md                     # Agent entry point
+├── index.html                    # Vite HTML entry
+├── package.json
+├── tsconfig.base.json            # Shared TS compiler options
+├── tsconfig.json                 # Library build (src/ minus react/tui)
+├── tsconfig.app.json             # Web app type-check (src/react + src/inc)
+├── tsconfig.tui.json             # TUI build (src/tui + src/inc)
+├── vite.config.ts                # Vite + React + Tailwind
+├── vitest.config.ts              # Unit test config
+└── playwright.config.ts          # E2E/scenario test config
+```
+
+## Shared Component System (`inc/`)
+
+The `inc/` pattern enables component reuse across Web and TUI by separating
+contracts from rendering:
+
+```
+src/inc/                          # CONTRACTS
+  types.ts                        # Platform-agnostic prop interfaces
+  useTheme.ts                     # Shared React context + hook
+                │
+        ┌───────┴───────┐
+        ▼               ▼
+src/react/inc/      src/tui/inc/  # IMPLEMENTATIONS
+  Button.tsx          Button.tsx
+  Badge.tsx           Badge.tsx
+  Input.tsx           Input.tsx
+  ThemeProvider.tsx    ThemeProvider.tsx
+  ThemeToggle.tsx      ThemeToggle.tsx
+```
+
+Each component has a shared interface defined once in `src/inc/types.ts`.
+Web components render HTML elements with Tailwind CSS classes.
+TUI components render Ink primitives (`<Box>`, `<Text>`) with ANSI colors.
+Both share the same `useTheme()` hook and `ThemeContext`.
+
+### Adding a New Component
+
+1. Define the props interface in `src/inc/types.ts`
+2. Create the web implementation in `src/react/inc/`
+3. Create the TUI implementation in `src/tui/inc/`
+4. Re-export from both `src/react/inc/index.ts` and `src/tui/inc/index.ts`
+
+## Build Pipelines
+
+The project has three separate TypeScript compilation targets:
+
+| Target | tsconfig | Entry | Output | Tooling |
+|--------|----------|-------|--------|---------|
+| **Library** | `tsconfig.json` | `src/index.ts` | `dist/` | `tsc` |
+| **Web App** | `tsconfig.app.json` | `src/react/main.tsx` | `dist-app/` | Vite |
+| **TUI** | `tsconfig.tui.json` | `src/tui/main.tsx` | `dist-tui/` | `tsc` |
+
+All three extend `tsconfig.base.json` (ES2022, ESNext modules, strict mode).
+The library tsconfig excludes `src/react/` and `src/tui/` to avoid JSX/DOM dependencies.
+
+## Theme System
+
+Both Web and TUI support light and dark themes using the same `Theme` type
+and `useTheme()` hook.
+
+**Web:** Theme is persisted in `localStorage`. The `<html>` element gets a
+`.dark` class, which activates CSS custom properties defined in `index.css`
+via Tailwind's `@custom-variant dark`.
+
+**TUI:** Theme is held in memory (defaults to dark). The `colors()` helper
+in `theme-colors.ts` returns a palette of ANSI-compatible hex colors for the
+active theme.
+
+## Testing Strategy
+
+See [agents/testing-strategy.md](../agents/testing-strategy.md) for the full
+contract. Key scripts:
+
+| Script | What it runs |
+|--------|-------------|
+| `pnpm test` | All tests (unit + e2e + scenario) |
+| `pnpm test:unit` | Vitest unit tests |
+| `pnpm test:smoke` | Scenario tests with smoke rules (fast-fail, one-line output) |
+| `pnpm test:e2e` | Playwright e2e tests |
+| `pnpm test:scenario` | Playwright scenario tests |
+
+Artifacts are written to `.cache/tests/<run-id>/`.
+
+## Future Architecture (Tier 2 & 3)
+
+The `src/inc/` shared layer is designed to grow as the Unapi core is built:
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   Unapi Definitions                  │
+│          (schema, types, validation, docs)           │
+└────────────────────────┬────────────────────────────┘
+                         │
+         ┌───────────────┼───────────────┐
+         ▼               ▼               ▼
+   ┌──────────┐    ┌──────────┐    ┌──────────┐
+   │   CLI    │    │   MCP    │    │   HTTP   │
+   │ (yargs)  │    │ (stdio)  │    │ (REST/WS)│
+   └──────────┘    └──────────┘    └──────────┘
+         │               │               │
+         └───────────────┼───────────────┘
+                         ▼
+               ┌──────────────────┐
+               │  Kanban Domain   │
+               │  (Board, Column, │
+               │   Card, etc.)    │
+               └──────────────────┘
+                         │
+              ┌──────────┼──────────┐
+              ▼          ▼          ▼
+        ┌─────────┐ ┌────────┐ ┌────────┐
+        │ Web UI  │ │  TUI   │ │Headless│
+        │ (React  │ │ (Ink)  │ │(import │
+        │  DOM)   │ │        │ │  lib)  │
+        └─────────┘ └────────┘ └────────┘
+```
+
+Transport layers (CLI, MCP, HTTP) will be thin wrappers auto-generated from
+Unapi definitions. The UI layers (Web, TUI) will consume the same domain
+model through the programmatic client library.
