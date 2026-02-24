@@ -18,6 +18,7 @@
     "build": "tsc",
     "build:app": "vite build",
     "build:ghpages": "node --import tsx scripts/generate-stats.ts && vite build && node --import tsx scripts/generate-stats.ts && vite build",
+    "build:test-recordings": "node --import tsx scripts/generate-test-recordings-index.ts",
     "build:tui": "tsc -p tsconfig.tui.json",
     "test": "pnpm run build && jabtrunner all --allow-missing-project",
     "test:unit": "jabtrunner unit",

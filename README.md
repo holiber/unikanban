@@ -10,6 +10,7 @@ A Kanban board built with the **Unapi** pattern — self-documented, type-safe, 
 - [Live (GitHub Pages)](https://holiber.github.io/unikanban/)
 - [Demo (Kanban UI)](https://holiber.github.io/unikanban/demo/)
 - [Stats](https://holiber.github.io/unikanban/stats/)
+- [Test recordings](https://holiber.github.io/unikanban/test-recordings/)
 
 ## Quick Start
 
