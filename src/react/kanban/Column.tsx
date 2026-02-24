@@ -5,11 +5,13 @@ import type { KanbanCard, KanbanColumn } from "./types.js";
 
 interface ColumnProps {
   column: KanbanColumn;
+  allColumns: KanbanColumn[];
   onAddCard: (columnId: string, title: string) => void;
   onDeleteCard: (columnId: string, cardId: string) => void;
+  onMoveCard?: (sourceColumnId: string, targetColumnId: string, cardId: string) => void;
 }
 
-export function Column({ column, onAddCard, onDeleteCard }: ColumnProps) {
+export function Column({ column, allColumns, onAddCard, onDeleteCard, onMoveCard }: ColumnProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
 
@@ -26,8 +28,11 @@ export function Column({ column, onAddCard, onDeleteCard }: ColumnProps) {
     setNewTitle("");
   }
 
+  const otherColumns = allColumns.filter((c) => c.id !== column.id);
+
   return (
     <div
+      data-testid="kanban-column"
       className="flex w-72 shrink-0 flex-col rounded-xl border border-border-primary
         bg-surface-secondary"
     >
@@ -46,6 +51,9 @@ export function Column({ column, onAddCard, onDeleteCard }: ColumnProps) {
             key={card.id}
             card={card}
             onDelete={(cardId: string) => onDeleteCard(column.id, cardId)}
+            onMove={onMoveCard ? (cardId: string, targetColumnId: string) =>
+              onMoveCard(column.id, targetColumnId, cardId) : undefined}
+            otherColumns={otherColumns}
           />
         ))}
 
