@@ -44,7 +44,7 @@ jobs:
         run: pnpm exec playwright install chromium --with-deps
 
       - name: Scenario tests (generate recordings)
-        run: pnpm test:scenario
+        run: RECORDINGS=1 pnpm test:scenario
 
       - name: Build library
         run: pnpm build

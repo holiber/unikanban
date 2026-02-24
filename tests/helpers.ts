@@ -1,7 +1,7 @@
 import { Locator, Page } from "@playwright/test";
 
 const isHuman = process.env.HUMAN === "1";
-const isCi = !!process.env.CI;
+const isRecordings = process.env.RECORDINGS === "1";
 const BREATH_DELAY_MS = 800;
 
 /**
@@ -38,10 +38,8 @@ type CursorMoveOptions = {
 const cursorPos = new WeakMap<Page, { x: number; y: number }>();
 
 function defaultCursorMoveOptions(): Required<CursorMoveOptions> {
-  // In CI we want videos to look like actual motion, not teleports.
-  // A tiny per-step delay yields real repaints and more unique frames.
   if (isHuman) return { steps: 18, stepDelayMs: 20 };
-  if (isCi) return { steps: 12, stepDelayMs: 16 };
+  if (isRecordings) return { steps: 12, stepDelayMs: 16 };
   return { steps: 6, stepDelayMs: 0 };
 }
 
@@ -99,7 +97,7 @@ export async function cursorClick(
   await cursorMoveToLocator(page, locator, opts);
   // Click via mouse so the injected cursor ring animates.
   await page.mouse.down();
-  await page.waitForTimeout(30);
+  if (isHuman || isRecordings) await page.waitForTimeout(30);
   await page.mouse.up();
 }
 
@@ -169,6 +167,6 @@ const CURSOR_INIT_SCRIPT = `
  */
 export async function showCursor(page: Page): Promise<void> {
   await page.addScriptTag({ content: CURSOR_INIT_SCRIPT });
-  await cursorMoveTo(page, 640, 360, { steps: 1, stepDelayMs: 0 });
+  await cursorMoveTo(page, 640, 360);
   await page.waitForTimeout(100);
 }

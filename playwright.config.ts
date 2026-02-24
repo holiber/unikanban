@@ -2,6 +2,7 @@ import { defineConfig } from "@playwright/test";
 
 const isHuman = process.env.HUMAN === "1";
 const isSmoke = process.env.SMOKE === "1";
+const isRecordings = process.env.RECORDINGS === "1";
 
 const E2E = /.*\.e2e\.(ts|js)x?$/;
 const SCENARIO = /.*\.scenario\.e2e\.(ts|js)x?$/;
@@ -11,7 +12,8 @@ export default defineConfig({
   timeout: isSmoke ? 30_000 : 60_000,
   expect: { timeout: 5_000 },
   retries: 0,
-  fullyParallel: !isHuman,
+  fullyParallel: !isHuman && !isRecordings,
+  workers: isRecordings ? 1 : undefined,
   forbidOnly: !!process.env.CI,
 
   use: {
