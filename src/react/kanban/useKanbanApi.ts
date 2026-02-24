@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import {
   createKanbanApi,
-  KANBAN_ALIASES,
   KANBAN_PROCEDURE_IDS,
   type KanbanProcedures,
 } from "../../domain/index.js";
@@ -63,7 +62,6 @@ export function useKanbanApi() {
       clientRef.current = createCallerClient<KanbanProcedures>(
         KANBAN_PROCEDURE_IDS,
         caller,
-        { aliases: KANBAN_ALIASES },
       );
     }
   }

@@ -9,22 +9,6 @@ export * from "./schemas.js";
 
 export type KanbanProcedures = ReturnType<typeof createKanbanProcedures>;
 
-export const KANBAN_ALIASES = {
-  // Legacy camelCase procedure names (compat)
-  getBoard: "board.get",
-  listBoards: "board.list",
-  createBoard: "board.create",
-  deleteBoard: "board.delete",
-  importMermaid: "board.importMermaid",
-  createColumn: "column.create",
-  updateColumn: "column.update",
-  deleteColumn: "column.delete",
-  createCard: "card.create",
-  updateCard: "card.update",
-  deleteCard: "card.delete",
-  moveCard: "card.move",
-} as const satisfies Record<string, string>;
-
 export const KANBAN_PROCEDURE_IDS: readonly (keyof KanbanProcedures & string)[] = [
   "board.get",
   "board.list",
@@ -43,9 +27,7 @@ export const KANBAN_PROCEDURE_IDS: readonly (keyof KanbanProcedures & string)[] 
 export function createKanbanApi(store?: KanbanStore) {
   const kanbanStore = store ?? new KanbanStore();
   const procedures = createKanbanProcedures(kanbanStore);
-  const router = createRouter(procedures, {
-    aliases: KANBAN_ALIASES,
-  });
+  const router = createRouter(procedures);
   const client = createClient(router);
 
   return { store: kanbanStore, router, client };
