@@ -54,13 +54,13 @@ Import the core library and use the Unapi-powered Kanban API:
 ```ts
 import { createKanbanApi } from "unikanban";
 
-const { client } = createKanbanApi();
+const { client: kanban } = createKanbanApi();
 
 // Full CRUD with type-safe, validated inputs
-const board = await client.board.create({ title: "Sprint 1" });
-const col = await client.column.create({ boardId: board.id, title: "To Do" });
-const doneCol = await client.column.create({ boardId: board.id, title: "Done" });
-const card = await client.card.create({
+const board = await kanban.board.create({ title: "Sprint 1" });
+const col = await kanban.column.create({ boardId: board.id, title: "To Do" });
+const doneCol = await kanban.column.create({ boardId: board.id, title: "Done" });
+const card = await kanban.card.create({
   boardId: board.id,
   columnId: col.id,
   title: "Write tests",
@@ -68,7 +68,7 @@ const card = await client.card.create({
 });
 
 // Move cards between columns
-await client.card.move({
+await kanban.card.move({
   boardId: board.id,
   sourceColumnId: col.id,
   targetColumnId: doneCol.id,
