@@ -13,3 +13,5 @@ export type {
   ClientShape,
 } from "./types.js";
 export type { EventHandler } from "./events.js";
+export { extractFields, zodToJsonSchema } from "./schema-utils.js";
+export type { FieldInfo } from "./schema-utils.js";

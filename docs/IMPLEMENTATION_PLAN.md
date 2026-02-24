@@ -36,12 +36,12 @@ Build the core "Unapi" definition layer and the Kanban board business logic.
 
 Wire up all the interface layers as thin wrappers around the Unapi core.
 
-- [ ] **CLI wrapper (yargs)** — auto-generate commands and `--help` from Unapi definitions, thin wrapper only
-- [ ] **MCP server** — thin wrapper exposing Unapi procedures as MCP tools (stdio transport)
-- [ ] **HTTP transport** — REST/WebSocket server auto-generated from Unapi definitions
-- [ ] **stdio / IPC transports** — additional transport implementations for headless inter-process communication
-- [ ] **OpenAPI / AsyncAPI generation** — generate spec docs from Unapi definitions
-- [ ] **Browser UI** — headed mode with a Kanban board web interface
-- [ ] **TUI** — terminal UI for headed terminal mode
-- [ ] **E2E / scenario tests** — end-to-end tests for CLI, HTTP, and UI modes
-- [ ] **Video proofs** — scenario tests demonstrating CLI, MCP, HTTP, and full E2E workflows
+- [x] **CLI wrapper (yargs)** — auto-generate commands and `--help` from Unapi definitions, thin wrapper only
+- [x] **MCP server** — thin wrapper exposing Unapi procedures as MCP tools (stdio transport)
+- [x] **HTTP transport** — REST server auto-generated from Unapi definitions with CORS support
+- [x] **stdio / IPC transports** — JSON-RPC stdio transport for headless inter-process communication
+- [x] **OpenAPI / AsyncAPI generation** — generate spec docs from Unapi definitions
+- [x] **Browser UI** — headed mode with a Kanban board web interface (React + Tailwind CSS)
+- [x] **TUI** — terminal UI for headed terminal mode (Ink)
+- [x] **E2E / scenario tests** — unit tests for CLI, HTTP, MCP, stdio, OpenAPI; scenario tests for UI workflows
+- [x] **Video proofs** — scenario tests demonstrating Browser UI CRUD, theme toggle, API log integration

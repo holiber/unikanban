@@ -6,6 +6,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
+      data-testid="theme-toggle"
       className="relative flex h-9 w-9 items-center justify-center rounded-lg
         border border-border-primary bg-surface-secondary
         text-text-secondary transition-colors hover:bg-surface-hover

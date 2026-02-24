@@ -19,3 +19,10 @@ export type {
 export { createKanbanApi, KanbanStore, createKanbanProcedures } from "./domain/index.js";
 export type { KanbanEvents } from "./domain/index.js";
 export type { Board, Column, Card } from "./domain/schemas.js";
+
+export { createHttpServer } from "./transports/http.js";
+export { createStdioTransport } from "./transports/stdio.js";
+export { createMcpServer } from "./transports/mcp.js";
+export { generateOpenApiSpec, generateAsyncApiSpec } from "./transports/openapi.js";
+export { createCli } from "./cli/index.js";
+export { extractFields, zodToJsonSchema } from "./unapi/schema-utils.js";
