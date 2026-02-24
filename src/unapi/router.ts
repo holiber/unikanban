@@ -80,11 +80,28 @@ export function createRouter<T extends RouterShape>(
 export function createClient<T extends RouterShape>(
   router: Router<T>,
 ): UnapiClient<T> {
+  return createCallerClient(
+    router.procedureIds,
+    (procedureName, input) => router.call(procedureName as any, input),
+    { aliases: router.aliases },
+  );
+}
+
+export type UnapiCaller = (
+  procedureName: string,
+  input: unknown,
+) => Promise<unknown>;
+
+export function createCallerClient<T extends RouterShape>(
+  procedureIds: readonly (string & keyof T)[],
+  call: UnapiCaller,
+  options?: { aliases?: Record<string, string> },
+): UnapiClient<T> {
   const client: Record<string, any> = {};
 
   // Canonical IDs: `board.create` -> client.board.create(...) + client["board.create"](...)
-  for (const id of router.procedureIds) {
-    const fn = (input: unknown) => router.call(id, input);
+  for (const id of procedureIds) {
+    const fn = (input: unknown) => call(String(id), input);
     client[id] = fn;
 
     const segments = String(id).split(".");
@@ -98,8 +115,8 @@ export function createClient<T extends RouterShape>(
   }
 
   // Aliases: keep backward-compatible flat names (e.g. `createBoard`)
-  for (const [alias, canonical] of Object.entries(router.aliases)) {
-    client[alias] = (input: unknown) => router.call(canonical, input);
+  for (const [alias, canonical] of Object.entries(options?.aliases ?? {})) {
+    client[alias] = (input: unknown) => call(canonical, input);
   }
 
   return client as UnapiClient<T>;
