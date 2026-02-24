@@ -13,6 +13,9 @@ export type {
   InferInput,
   InferOutput,
   ClientShape,
+  FlatClientShape,
+  NestedClientShape,
+  UnapiClient,
   EventHandler,
 } from "./unapi/index.js";
 

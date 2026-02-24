@@ -126,16 +126,16 @@ export function createKanbanProcedures(store: KanbanStore) {
   });
 
   return {
-    getBoard,
-    listBoards,
-    createBoard,
-    deleteBoard,
-    createColumn,
-    updateColumn,
-    deleteColumn,
-    createCard,
-    updateCard,
-    deleteCard,
-    moveCard,
+    "board.get": getBoard,
+    "board.list": listBoards,
+    "board.create": createBoard,
+    "board.delete": deleteBoard,
+    "column.create": createColumn,
+    "column.update": updateColumn,
+    "column.delete": deleteColumn,
+    "card.create": createCard,
+    "card.update": updateCard,
+    "card.delete": deleteCard,
+    "card.move": moveCard,
   };
 }

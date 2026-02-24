@@ -14,12 +14,12 @@ export function createCli<T extends RouterShape>(
     .help();
 
   for (const proc of desc.procedures) {
-    const procedure = router.procedures[proc.name];
+    const procedure = router.procedures[proc.id as keyof T];
     const fields = extractFields(procedure.input);
 
     cli = cli.command(
-      proc.name,
-      proc.description,
+      renderCliCommand(proc.id),
+      proc.meta.description,
       (yarg) => {
         let builder = yarg;
         for (const field of fields) {
@@ -45,7 +45,7 @@ export function createCli<T extends RouterShape>(
           }
         }
         try {
-          const result = await router.call(proc.name as any, input as any);
+          const result = await router.call(proc.id, input);
           console.log(JSON.stringify(result, null, 2));
         } catch (err: any) {
           console.error(`Error: ${err.message}`);
@@ -72,4 +72,9 @@ function mapFieldType(type: string): "string" | "number" | "boolean" | "array" {
     default:
       return "string";
   }
+}
+
+function renderCliCommand(id: string): string {
+  // Recommended rendering: `board.create` -> `board create`
+  return id.split(".").join(" ");
 }

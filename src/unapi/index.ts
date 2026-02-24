@@ -11,6 +11,9 @@ export type {
   InferInput,
   InferOutput,
   ClientShape,
+  FlatClientShape,
+  NestedClientShape,
+  UnapiClient,
 } from "./types.js";
 export type { EventHandler } from "./events.js";
 export { extractFields, zodToJsonSchema } from "./schema-utils.js";
