@@ -3,7 +3,7 @@ import { settle, hold, showCursor } from "../helpers.js";
 
 test.describe("UniKanban Board — Light Mode Proofs", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/demo/");
     await page.waitForLoadState("networkidle");
     await showCursor(page);
     await settle(page);
@@ -80,7 +80,7 @@ test.describe("UniKanban Board — Light Mode Proofs", () => {
 test.describe("UniKanban Board — Dark Mode Proofs", () => {
   test.beforeEach(async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
-    await page.goto("/");
+    await page.goto("/demo/");
     await page.waitForLoadState("networkidle");
     await showCursor(page);
     await settle(page);

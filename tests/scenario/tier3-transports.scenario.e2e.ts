@@ -3,7 +3,7 @@ import { settle, hold, showCursor } from "../helpers.js";
 
 test.describe("Tier 3 — Transports & UI Integration Proofs", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/demo/");
     await page.waitForLoadState("networkidle");
     await showCursor(page);
     await settle(page);
