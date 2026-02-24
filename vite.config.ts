@@ -14,6 +14,7 @@ export default defineConfig(({ command }) => ({
         main: resolve(__dirname, "index.html"),
         demo: resolve(__dirname, "demo/index.html"),
         stats: resolve(__dirname, "stats/index.html"),
+        testRecordings: resolve(__dirname, "test-recordings/index.html"),
       },
     },
   },

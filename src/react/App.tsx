@@ -1,6 +1,8 @@
 import { ThemeProvider, ThemeToggle } from "./inc/index.js";
 import { Board } from "./kanban/Board.js";
 
+const BASE = import.meta.env.BASE_URL;
+
 export function App() {
   return (
     <ThemeProvider>
@@ -22,7 +24,21 @@ export function App() {
               UniKanban
             </h1>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-3">
+            <a
+              href={`${BASE}stats/`}
+              className="text-sm text-brand hover:text-brand-hover"
+            >
+              Stats
+            </a>
+            <a
+              href={`${BASE}test-recordings/`}
+              className="text-sm text-brand hover:text-brand-hover"
+            >
+              Test recordings
+            </a>
+            <ThemeToggle />
+          </div>
         </header>
 
         {/* Board */}

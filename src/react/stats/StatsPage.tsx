@@ -69,6 +69,12 @@ export function StatsPage() {
             >
               Demo
             </a>
+            <a
+              href={`${BASE}test-recordings/`}
+              className="text-sm text-brand hover:text-brand-hover"
+            >
+              Test recordings
+            </a>
             <ThemeToggle />
           </div>
         </header>
