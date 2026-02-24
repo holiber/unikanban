@@ -18,7 +18,7 @@ test.describe("Tier 3 — Transports & UI Integration Proofs", () => {
   });
 
   test("Browser UI supports theme toggle (light/dark)", async ({ page }) => {
-    const themeToggle = page.getByTestId("theme-toggle");
+    const themeToggle = page.getByRole("button", { name: /switch to/i });
     await expect(themeToggle).toBeVisible();
 
     await themeToggle.click();
