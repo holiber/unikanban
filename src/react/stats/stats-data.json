@@ -1,0 +1,168 @@
+{
+  "package": {
+    "name": "unikanban",
+    "version": "0.1.0",
+    "description": "A Kanban board built with the Unapi pattern — self-documented, type-safe, transport-agnostic APIs."
+  },
+  "dependencies": [
+    {
+      "name": "ink",
+      "version": "^6.8.0",
+      "type": "runtime"
+    },
+    {
+      "name": "react",
+      "version": "^19.2.4",
+      "type": "runtime"
+    },
+    {
+      "name": "react-dom",
+      "version": "^19.2.4",
+      "type": "runtime"
+    },
+    {
+      "name": "yargs",
+      "version": "^18.0.0",
+      "type": "runtime"
+    },
+    {
+      "name": "zod",
+      "version": "^4.3.6",
+      "type": "runtime"
+    },
+    {
+      "name": "@playwright/test",
+      "version": "^1.52.0",
+      "type": "dev"
+    },
+    {
+      "name": "@tailwindcss/vite",
+      "version": "^4.2.1",
+      "type": "dev"
+    },
+    {
+      "name": "@types/node",
+      "version": "^22",
+      "type": "dev"
+    },
+    {
+      "name": "@types/react",
+      "version": "^19.2.14",
+      "type": "dev"
+    },
+    {
+      "name": "@types/react-dom",
+      "version": "^19.2.3",
+      "type": "dev"
+    },
+    {
+      "name": "@types/yargs",
+      "version": "^17",
+      "type": "dev"
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "version": "^5.1.4",
+      "type": "dev"
+    },
+    {
+      "name": "@vitest/coverage-v8",
+      "version": "^3.2.4",
+      "type": "dev"
+    },
+    {
+      "name": "jabtrunner",
+      "version": "https://github.com/holiber/jabterm/releases/download/jabtrunner-v0.1.0/jabtrunner-0.1.0.tgz",
+      "type": "dev"
+    },
+    {
+      "name": "tailwindcss",
+      "version": "^4.2.1",
+      "type": "dev"
+    },
+    {
+      "name": "tsx",
+      "version": "^4.21.0",
+      "type": "dev"
+    },
+    {
+      "name": "typescript",
+      "version": "^5",
+      "type": "dev"
+    },
+    {
+      "name": "vite",
+      "version": "^7.3.1",
+      "type": "dev"
+    },
+    {
+      "name": "vitest",
+      "version": "^3.2.0",
+      "type": "dev"
+    }
+  ],
+  "source": {
+    "totalFiles": 56,
+    "totalLines": 3394,
+    "byExtension": {
+      ".ts": {
+        "files": 29,
+        "lines": 1667,
+        "bytes": 46280
+      },
+      ".tsx": {
+        "files": 25,
+        "lines": 1497,
+        "bytes": 48936
+      },
+      ".css": {
+        "files": 1,
+        "lines": 62,
+        "bytes": 1587
+      },
+      ".json": {
+        "files": 1,
+        "lines": 168,
+        "bytes": 3179
+      }
+    }
+  },
+  "build": {
+    "files": [
+      {
+        "path": "assets/demo-CKBS6pZc.js",
+        "size": 84108
+      },
+      {
+        "path": "assets/index-B8M_DAQU.css",
+        "size": 24525
+      },
+      {
+        "path": "assets/index-B_Sn-h-9.js",
+        "size": 195073
+      },
+      {
+        "path": "assets/main-C7Z6e0Mm.js",
+        "size": 4869
+      },
+      {
+        "path": "assets/stats-ZntdOKGb.js",
+        "size": 9722
+      },
+      {
+        "path": "demo/index.html",
+        "size": 508
+      },
+      {
+        "path": "index.html",
+        "size": 499
+      },
+      {
+        "path": "stats/index.html",
+        "size": 510
+      }
+    ],
+    "totalSize": 319814
+  },
+  "generatedAt": "2026-02-24T11:26:36.864Z"
+}

@@ -17,6 +17,7 @@
     "http": "node --import tsx src/transports/http-main.ts",
     "build": "tsc",
     "build:app": "vite build",
+    "build:ghpages": "node --import tsx scripts/generate-stats.ts && vite build && node --import tsx scripts/generate-stats.ts && vite build",
     "build:tui": "tsc -p tsconfig.tui.json",
     "test": "pnpm run build && jabtrunner all --allow-missing-project",
     "test:unit": "jabtrunner unit",

@@ -46,14 +46,23 @@ jobs:
             --source .cache/coverage/coverage-summary.json \
             --output .cache/badges/coverage.svg
 
-      - name: Deploy badges to gh-pages
+      - name: Build GitHub Pages site
+        if: github.ref == 'refs/heads/main'
+        run: pnpm build:ghpages
+
+      - name: Prepare gh-pages directory
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cp .cache/badges/coverage.svg dist-app/badges-coverage.svg
+          mkdir -p dist-app/badges
+          cp .cache/badges/coverage.svg dist-app/badges/coverage.svg
+
+      - name: Deploy to gh-pages
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .cache/badges
-          destination_dir: badges
-          keep_files: true
+          publish_dir: dist-app
           publish_branch: gh-pages
 
       - name: Upload coverage artifacts
