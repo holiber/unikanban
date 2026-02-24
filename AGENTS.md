@@ -6,4 +6,5 @@ If you are an AI agent (or automation) working on this repository, follow the te
 
 ## Project Goals
 
-See [`docs/GOALS.md`](docs/GOALS.md) for the vision and architecture.
+See [`docs/GOALS.md`](docs/GOALS.md) for the vision
+See [`docs/unapi.md`](docs/GOALS.md) for the vision
