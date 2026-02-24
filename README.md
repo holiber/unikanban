@@ -5,6 +5,12 @@
 
 A Kanban board built with the **Unapi** pattern — self-documented, type-safe, transport-agnostic APIs in TypeScript.
 
+## Links
+
+- [Live (GitHub Pages)](https://holiber.github.io/unikanban/)
+- [Demo (Kanban UI)](https://holiber.github.io/unikanban/demo/)
+- [Stats](https://holiber.github.io/unikanban/stats/)
+
 ## Quick Start
 
 ```bash
@@ -53,6 +59,7 @@ const { client } = createKanbanApi();
 // Full CRUD with type-safe, validated inputs
 const board = await client.createBoard({ title: "Sprint 1" });
 const col = await client.createColumn({ boardId: board.id, title: "To Do" });
+const doneCol = await client.createColumn({ boardId: board.id, title: "Done" });
 const card = await client.createCard({
   boardId: board.id,
   columnId: col.id,
@@ -81,6 +88,7 @@ pnpm build
 pnpm test          # all tests (unit + e2e + scenario)
 pnpm test:unit     # unit tests only
 pnpm test:smoke    # fast smoke check
+pnpm test:coverage # unit tests + coverage (used for the badge)
 ```
 
 ## Documentation
