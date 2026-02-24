@@ -39,7 +39,7 @@ export function LandingPage() {
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-2">
+          <div className="grid gap-8 md:grid-cols-3">
             <a
               href={`${BASE}demo/`}
               className="group rounded-2xl border border-border-primary bg-surface-secondary
@@ -82,6 +82,29 @@ export function LandingPage() {
               <p className="text-text-secondary">
                 View package information, bundle sizes, dependency tree,
                 and source code statistics.
+              </p>
+            </a>
+
+            <a
+              href={`${BASE}test-recordings/`}
+              className="group rounded-2xl border border-border-primary bg-surface-secondary
+                p-8 transition-all hover:border-brand hover:shadow-lg"
+            >
+              <div
+                className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl
+                  bg-warning/10 text-2xl transition-transform group-hover:scale-110"
+              >
+                <svg className="h-7 w-7 text-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 7h3l2-2h6l2 2h3v12H4V7z" strokeLinejoin="round" />
+                  <circle cx="12" cy="13" r="3" />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-xl font-semibold text-text-primary">
+                Test recordings
+              </h3>
+              <p className="text-text-secondary">
+                Browse Playwright scenario videos and screenshots published from
+                CI runs.
               </p>
             </a>
           </div>
