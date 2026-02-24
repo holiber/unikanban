@@ -7,6 +7,8 @@ It serves as both a useful productivity tool and a reference implementation demo
 
 ## What is Unapi?
 
+Check docs/unapi.md
+
 Unapi is a way of describing APIs for your services, UI widgets, and forms in a self-documented way.
 It insists on a **single source of truth** for your API docs and types.
 
