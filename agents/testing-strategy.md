@@ -211,6 +211,32 @@ Behavior:
 
 ---
 
+## Video / GIF proofs (milestone evidence)
+
+When completing a major milestone (Tier 1, Tier 2, etc.) or a significant feature, **video or GIF evidence** MUST be attached to the relevant PR or issue.
+
+### Rules
+
+* Scenario tests MUST record video (`video: "on"` in Playwright config).
+* Every scenario test produces a `.webm` video in `.cache/tests/playwright-results/`.
+* When closing a tier or milestone:
+  1. Run `pnpm test:scenario` — this generates videos for all working features.
+  2. Attach the relevant videos/screenshots to the PR description or issue comment as proof.
+* Videos should demonstrate core user workflows, not just pass/fail assertions.
+* For richer demo recordings, use human mode: `pnpm test:scenario -- --human` (headed + paced).
+
+### What to prove
+
+Each tier should provide evidence for its key deliverables:
+
+| Tier | Evidence required |
+|------|-------------------|
+| **Tier 1** | App loads, board renders with columns/cards, theme toggle, add/delete cards, add columns, no console errors |
+| **Tier 2** | Unapi core operations, domain model CRUD, type inference |
+| **Tier 3** | CLI commands, MCP tools, HTTP endpoints, full E2E workflow |
+
+---
+
 ## Recommended tooling (non-binding)
 
 * **Unit:** Vitest (Vite repos) or Node's built-in test runner for Node libs
