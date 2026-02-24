@@ -24,14 +24,14 @@ title: UniKanban Board
 ---
 kanban
   Backlog
-    [Design Unapi schema format - Define the TypeScript-first API procedure declaration format] #core
-    [Research transport options - Compare HTTP, stdio, IPC for transport layer] #research
+    [Design Unapi schema format - Define the TypeScript-first API procedure declaration format] !high #core
+    [Research transport options - Compare HTTP, stdio, IPC for transport layer] !medium #research
   To Do
-    [Implement CLI wrapper - yargs-based CLI that auto-generates --help from Unapi definitions] #cli
+    [Implement CLI wrapper - yargs-based CLI that auto-generates --help from Unapi definitions] !medium #cli
   In Progress
-    [Project scaffolding - Set up TypeScript, Vite, React, Tailwind, test runner] #setup
+    [Project scaffolding - Set up TypeScript, Vite, React, Tailwind, test runner] !high #setup
   Done
-    [Create GOALS.md] #docs
+    [Create GOALS.md] !low #docs
 `.trim();
 
 type Mode = "local" | "remote";

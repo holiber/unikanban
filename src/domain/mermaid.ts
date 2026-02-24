@@ -39,12 +39,29 @@ function leadingSpaces(line: string): number {
   return m ? m[1]!.length : 0;
 }
 
-function parseCardTitle(raw: string): { title: string; description?: string; tags?: string[] } {
+function parseCardTitle(raw: string): {
+  title: string;
+  description?: string;
+  priority?: Card["priority"];
+  tags?: string[];
+} {
   let s = raw.trim();
 
-  // Mermaid examples often show card titles as [Title]
-  const bracket = s.match(/^\[(.+?)\]\s*$/);
-  if (bracket) s = bracket[1]!.trim();
+  // Mermaid examples often show card titles as [Title], and we allow trailing metadata tokens.
+  if (s.startsWith("[")) {
+    const end = s.indexOf("]");
+    if (end > 0) {
+      const inside = s.slice(1, end).trim();
+      const tail = s.slice(end + 1).trim();
+      s = tail ? `${inside} ${tail}` : inside;
+    }
+  }
+
+  let priority: Card["priority"] | undefined;
+  s = s.replace(/(^|\s)!(low|medium|high)(?=\s|$)/gi, (m, p1, p2) => {
+    priority = String(p2).toLowerCase() as Card["priority"];
+    return String(p1 ?? "");
+  });
 
   let description: string | undefined;
   const descSplit = s.split(" - ");
@@ -60,6 +77,7 @@ function parseCardTitle(raw: string): { title: string; description?: string; tag
   return {
     title,
     ...(description ? { description } : {}),
+    ...(priority ? { priority } : {}),
     ...(tags.length ? { tags } : {}),
   };
 }
@@ -102,6 +120,7 @@ export function parseMermaidKanban(input: string): MermaidKanbanSeed {
     current.cards.push({
       title: card.title,
       ...(card.description ? { description: card.description } : {}),
+      ...(card.priority ? { priority: card.priority } : {}),
       ...(card.tags ? { tags: card.tags } : {}),
     });
   }
