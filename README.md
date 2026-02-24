@@ -1,5 +1,8 @@
 # UniKanban
 
+[![CI](https://github.com/holiber/unikanban/actions/workflows/ci.yml/badge.svg)](https://github.com/holiber/unikanban/actions/workflows/ci.yml)
+[![Coverage](https://holiber.github.io/unikanban/badges/coverage.svg)](https://github.com/holiber/unikanban/actions/workflows/ci.yml)
+
 A Kanban board built with the **Unapi** pattern — self-documented, type-safe, transport-agnostic APIs in TypeScript.
 
 ## Quick Start
