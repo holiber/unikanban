@@ -13,17 +13,17 @@ describe("CLI Kanban Integration", () => {
     cli.exitProcess(false);
 
     const expectedCommands = [
-      "getBoard",
-      "listBoards",
-      "createBoard",
-      "deleteBoard",
-      "createColumn",
-      "updateColumn",
-      "deleteColumn",
-      "createCard",
-      "updateCard",
-      "deleteCard",
-      "moveCard",
+      "board get",
+      "board list",
+      "board create",
+      "board delete",
+      "column create",
+      "column update",
+      "column delete",
+      "card create",
+      "card update",
+      "card delete",
+      "card move",
     ];
 
     for (const cmd of expectedCommands) {
@@ -41,7 +41,7 @@ describe("CLI Kanban Integration", () => {
     console.log = (msg: string) => { output = msg; };
 
     try {
-      await cli.parseAsync(["createBoard", "--title", "CLI Test Board"]);
+      await cli.parseAsync(["board", "create", "--title", "CLI Test Board"]);
     } finally {
       console.log = originalLog;
     }

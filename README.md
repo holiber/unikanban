@@ -57,10 +57,10 @@ import { createKanbanApi } from "unikanban";
 const { client } = createKanbanApi();
 
 // Full CRUD with type-safe, validated inputs
-const board = await client.createBoard({ title: "Sprint 1" });
-const col = await client.createColumn({ boardId: board.id, title: "To Do" });
-const doneCol = await client.createColumn({ boardId: board.id, title: "Done" });
-const card = await client.createCard({
+const board = await client.board.create({ title: "Sprint 1" });
+const col = await client.column.create({ boardId: board.id, title: "To Do" });
+const doneCol = await client.column.create({ boardId: board.id, title: "Done" });
+const card = await client.card.create({
   boardId: board.id,
   columnId: col.id,
   title: "Write tests",
@@ -68,7 +68,7 @@ const card = await client.createCard({
 });
 
 // Move cards between columns
-await client.moveCard({
+await client.card.move({
   boardId: board.id,
   sourceColumnId: col.id,
   targetColumnId: doneCol.id,

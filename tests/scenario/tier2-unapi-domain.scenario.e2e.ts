@@ -38,7 +38,7 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     await expect(logEntries.first()).toBeVisible();
 
     const firstEntry = logEntries.first();
-    await expect(firstEntry).toContainText("createCard");
+    await expect(firstEntry).toContainText("card.create");
     await hold(page);
   });
 
@@ -64,7 +64,7 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     ).not.toBeVisible();
 
     const logEntries = page.getByTestId("api-log-entry");
-    await expect(logEntries.first()).toContainText("deleteCard");
+    await expect(logEntries.first()).toContainText("card.delete");
     await hold(page);
   });
 
@@ -116,7 +116,7 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     ).toBeVisible();
 
     const logEntries = page.getByTestId("api-log-entry");
-    await expect(logEntries.first()).toContainText("moveCard");
+    await expect(logEntries.first()).toContainText("card.move");
     await hold(page);
   });
 
@@ -137,17 +137,17 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     expect(count).toBeGreaterThanOrEqual(10);
 
     const procedureNames = [
-      "getBoard",
-      "listBoards",
-      "createBoard",
-      "deleteBoard",
-      "createColumn",
-      "updateColumn",
-      "deleteColumn",
-      "createCard",
-      "updateCard",
-      "deleteCard",
-      "moveCard",
+      "board.get",
+      "board.list",
+      "board.create",
+      "board.delete",
+      "column.create",
+      "column.update",
+      "column.delete",
+      "card.create",
+      "card.update",
+      "card.delete",
+      "card.move",
     ];
 
     for (const name of procedureNames) {
@@ -186,7 +186,7 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     await expect(reviewColumn).toBeVisible();
 
     const logEntries = page.getByTestId("api-log-entry");
-    await expect(logEntries.first()).toContainText("createColumn");
+    await expect(logEntries.first()).toContainText("column.create");
     await hold(page);
 
     await reviewColumn.getByRole("button", { name: /add card/i }).click();
@@ -198,7 +198,7 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     await settle(page);
 
     await expect(reviewColumn.getByText("Review this PR")).toBeVisible();
-    await expect(logEntries.first()).toContainText("createCard");
+    await expect(logEntries.first()).toContainText("card.create");
     await hold(page);
 
     const cardTitle = reviewColumn.locator("h4", {
@@ -216,7 +216,7 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     await expect(
       reviewColumn.locator("h4", { hasText: "Review this PR" }),
     ).not.toBeVisible();
-    await expect(logEntries.first()).toContainText("deleteCard");
+    await expect(logEntries.first()).toContainText("card.delete");
     await hold(page);
   });
 
