@@ -20,13 +20,15 @@
     "test:e2e": "pnpm run build && jabtrunner e2e --allow-missing-project",
     "test:scenario": "pnpm run build && jabtrunner scenario --allow-missing-project",
     "test:smoke": "pnpm run build && jabtrunner scenario --smoke --allow-missing-project",
+    "test:coverage": "vitest run --coverage",
     "test:integration": "node -e \"console.log('No integration tests yet.')\""
   },
   "dependencies": {
     "ink": "^6.8.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "yargs": "^18.0.0"
+    "yargs": "^18.0.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
@@ -36,6 +38,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/yargs": "^17",
     "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "^3.2.4",
     "jabtrunner": "https://github.com/holiber/jabterm/releases/download/jabtrunner-v0.1.0/jabtrunner-0.1.0.tgz",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",

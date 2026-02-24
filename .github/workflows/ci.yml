@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Unit tests with coverage
+        run: pnpm test:coverage
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Scenario tests
+        run: pnpm test:scenario
+
+      - name: Generate coverage badge
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p .cache/badges
+          npx coverage-badges-cli \
+            --source .cache/coverage/coverage-summary.json \
+            --output .cache/badges/coverage.svg
+
+      - name: Deploy badges to gh-pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .cache/badges
+          destination_dir: badges
+          keep_files: true
+          publish_branch: gh-pages
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: .cache/coverage/
+          retention-days: 14
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: .cache/tests/
+          retention-days: 14

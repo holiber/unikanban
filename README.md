@@ -1,5 +1,8 @@
 # UniKanban
 
+[![CI](https://github.com/holiber/unikanban/actions/workflows/ci.yml/badge.svg)](https://github.com/holiber/unikanban/actions/workflows/ci.yml)
+[![Coverage](https://holiber.github.io/unikanban/badges/coverage.svg)](https://github.com/holiber/unikanban/actions/workflows/ci.yml)
+
 A Kanban board built with the **Unapi** pattern — self-documented, type-safe, transport-agnostic APIs in TypeScript.
 
 ## Quick Start
@@ -40,10 +43,30 @@ pnpm build:tui
 
 ### Headless (Library)
 
-Import the core library in your own code:
+Import the core library and use the Unapi-powered Kanban API:
 
 ```ts
-import { hello } from "unikanban";
+import { createKanbanApi } from "unikanban";
+
+const { client } = createKanbanApi();
+
+// Full CRUD with type-safe, validated inputs
+const board = await client.createBoard({ title: "Sprint 1" });
+const col = await client.createColumn({ boardId: board.id, title: "To Do" });
+const card = await client.createCard({
+  boardId: board.id,
+  columnId: col.id,
+  title: "Write tests",
+  priority: "high",
+});
+
+// Move cards between columns
+await client.moveCard({
+  boardId: board.id,
+  sourceColumnId: col.id,
+  targetColumnId: doneCol.id,
+  cardId: card.id,
+});
 ```
 
 Build the library:

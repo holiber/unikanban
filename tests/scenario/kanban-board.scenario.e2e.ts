@@ -33,10 +33,9 @@ test.describe("UniKanban Board — Light Mode Proofs", () => {
   });
 
   test("add a new card to a column", async ({ page }) => {
-    const columns = page
-      .locator("main > div > div")
-      .filter({ has: page.locator("h3") });
-    const backlogColumn = columns.filter({ hasText: "Backlog" });
+    const backlogColumn = page
+      .locator("[data-testid='kanban-column']")
+      .filter({ hasText: "Backlog" });
 
     await backlogColumn.getByRole("button", { name: /add card/i }).click();
     await settle(page);
