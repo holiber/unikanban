@@ -1,6 +1,7 @@
-import { Page } from "@playwright/test";
+import { Locator, Page } from "@playwright/test";
 
 const isHuman = process.env.HUMAN === "1";
+const isRecordings = process.env.RECORDINGS === "1";
 const BREATH_DELAY_MS = 800;
 
 /**
@@ -27,6 +28,77 @@ export async function settle(page: Page, ms = 400): Promise<void> {
  */
 export async function hold(page: Page, ms = 1500): Promise<void> {
   await page.waitForTimeout(ms);
+}
+
+type CursorMoveOptions = {
+  steps?: number;
+  stepDelayMs?: number;
+};
+
+const cursorPos = new WeakMap<Page, { x: number; y: number }>();
+
+function defaultCursorMoveOptions(): Required<CursorMoveOptions> {
+  if (isHuman) return { steps: 18, stepDelayMs: 20 };
+  if (isRecordings) return { steps: 12, stepDelayMs: 16 };
+  return { steps: 6, stepDelayMs: 0 };
+}
+
+export async function cursorMoveTo(
+  page: Page,
+  x: number,
+  y: number,
+  opts: CursorMoveOptions = {},
+): Promise<void> {
+  const { steps, stepDelayMs } = { ...defaultCursorMoveOptions(), ...opts };
+  const from = cursorPos.get(page) ?? { x: 0, y: 0 };
+
+  for (let i = 1; i <= steps; i++) {
+    const t = i / steps;
+    const nx = from.x + (x - from.x) * t;
+    const ny = from.y + (y - from.y) * t;
+    await page.mouse.move(nx, ny);
+    if (stepDelayMs > 0) await page.waitForTimeout(stepDelayMs);
+  }
+
+  cursorPos.set(page, { x, y });
+}
+
+export async function cursorMoveToLocator(
+  page: Page,
+  locator: Locator,
+  opts: CursorMoveOptions = {},
+): Promise<void> {
+  await locator.scrollIntoViewIfNeeded();
+  const box = await locator.boundingBox();
+  if (!box) {
+    // Fallback when the element is not currently measurable.
+    await locator.hover();
+    return;
+  }
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await cursorMoveTo(page, x, y, opts);
+}
+
+export async function cursorHover(
+  page: Page,
+  locator: Locator,
+  opts: CursorMoveOptions = {},
+): Promise<void> {
+  await cursorMoveToLocator(page, locator, opts);
+  await locator.hover();
+}
+
+export async function cursorClick(
+  page: Page,
+  locator: Locator,
+  opts: CursorMoveOptions = {},
+): Promise<void> {
+  await cursorMoveToLocator(page, locator, opts);
+  // Click via mouse so the injected cursor ring animates.
+  await page.mouse.down();
+  if (isHuman || isRecordings) await page.waitForTimeout(30);
+  await page.mouse.up();
 }
 
 const CURSOR_INIT_SCRIPT = `
@@ -95,6 +167,6 @@ const CURSOR_INIT_SCRIPT = `
  */
 export async function showCursor(page: Page): Promise<void> {
   await page.addScriptTag({ content: CURSOR_INIT_SCRIPT });
-  await page.mouse.move(640, 360);
+  await cursorMoveTo(page, 640, 360);
   await page.waitForTimeout(100);
 }

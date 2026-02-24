@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { settle, hold, showCursor } from "../helpers.js";
+import { cursorClick, cursorHover, hold, settle, showCursor } from "../helpers.js";
 
 test.describe("UniKanban Board — Light Mode Proofs", () => {
   test.beforeEach(async ({ page }) => {
@@ -37,15 +37,16 @@ test.describe("UniKanban Board — Light Mode Proofs", () => {
       .locator("[data-testid='kanban-column']")
       .filter({ hasText: "Backlog" });
 
-    await backlogColumn.getByRole("button", { name: /add card/i }).click();
+    await cursorClick(page, backlogColumn.getByRole("button", { name: /add card/i }));
     await settle(page);
 
     const input = backlogColumn.getByPlaceholder("Card title...");
     await expect(input).toBeVisible();
+    await cursorClick(page, input);
     await input.fill("My new test card");
     await hold(page);
 
-    await backlogColumn.getByRole("button", { name: "Add" }).click();
+    await cursorClick(page, backlogColumn.getByRole("button", { name: "Add" }));
     await settle(page);
 
     await expect(backlogColumn.getByText("My new test card")).toBeVisible();
@@ -54,19 +55,22 @@ test.describe("UniKanban Board — Light Mode Proofs", () => {
 
   test("add a new column to the board", async ({ page }) => {
     const addColumnButton = page.getByRole("button", { name: /add column/i });
-    await addColumnButton.click();
+    await cursorClick(page, addColumnButton);
     await settle(page);
 
     const input = page.getByPlaceholder("Column title...");
     await expect(input).toBeVisible();
+    await cursorClick(page, input);
     await input.fill("Review");
     await hold(page);
 
-    await page
-      .locator("div")
-      .filter({ has: page.getByPlaceholder("Column title...") })
-      .getByRole("button", { name: "Add column" })
-      .click();
+    await cursorClick(
+      page,
+      page
+        .locator("div")
+        .filter({ has: page.getByPlaceholder("Column title...") })
+        .getByRole("button", { name: "Add column" }),
+    );
     await settle(page);
 
     await expect(page.locator("h3", { hasText: "Review" })).toBeVisible();
@@ -94,12 +98,12 @@ test.describe("UniKanban Board — Dark Mode Proofs", () => {
     await hold(page);
 
     const themeButton = page.getByRole("button", { name: /switch to/i });
-    await themeButton.click();
+    await cursorClick(page, themeButton);
     await settle(page);
     await expect(html).not.toHaveClass(/dark/);
     await hold(page);
 
-    await themeButton.click();
+    await cursorClick(page, themeButton);
     await settle(page);
     await expect(html).toHaveClass(/dark/);
     await hold(page);
@@ -113,10 +117,10 @@ test.describe("UniKanban Board — Dark Mode Proofs", () => {
     const card = cardTitle.locator(
       "xpath=ancestor::div[contains(@class, 'group')]",
     );
-    await card.hover();
+    await cursorHover(page, card);
     await hold(page);
 
-    await card.getByRole("button", { name: "Delete card" }).click();
+    await cursorClick(page, card.getByRole("button", { name: "Delete card" }));
     await settle(page);
 
     await expect(
@@ -139,18 +143,19 @@ test.describe("UniKanban Board — Dark Mode Proofs", () => {
     await settle(page);
 
     const themeButton = page.getByRole("button", { name: /switch to/i });
-    await themeButton.click();
+    await cursorClick(page, themeButton);
     await hold(page);
-    await themeButton.click();
+    await cursorClick(page, themeButton);
     await hold(page);
 
     const addCardButton = page
       .getByRole("button", { name: /add card/i })
       .first();
-    await addCardButton.click();
+    await cursorClick(page, addCardButton);
     await settle(page);
 
     const input = page.getByPlaceholder("Card title...");
+    await cursorClick(page, input);
     await input.fill("Console test card");
     await hold(page);
     await input.press("Escape");

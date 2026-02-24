@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { settle, hold, showCursor } from "../helpers.js";
+import { cursorClick, cursorHover, hold, settle, showCursor } from "../helpers.js";
 
 test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
   test.beforeEach(async ({ page }) => {
@@ -11,7 +11,7 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
 
   test("API log shows procedure calls on card creation", async ({ page }) => {
     const toggleBtn = page.getByTestId("toggle-api-log");
-    await toggleBtn.click();
+    await cursorClick(page, toggleBtn);
     await settle(page);
 
     const logPanel = page.getByTestId("api-log-panel");
@@ -22,14 +22,15 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
       .locator("[data-testid='kanban-column']")
       .filter({ hasText: "Backlog" });
 
-    await backlogColumn.getByRole("button", { name: /add card/i }).click();
+    await cursorClick(page, backlogColumn.getByRole("button", { name: /add card/i }));
     await settle(page);
 
     const input = backlogColumn.getByPlaceholder("Card title...");
+    await cursorClick(page, input);
     await input.fill("Unapi-powered card");
     await hold(page);
 
-    await backlogColumn.getByRole("button", { name: "Add" }).click();
+    await cursorClick(page, backlogColumn.getByRole("button", { name: "Add" }));
     await settle(page);
 
     await expect(backlogColumn.getByText("Unapi-powered card")).toBeVisible();
@@ -44,7 +45,7 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
 
   test("API log shows procedure calls on card deletion", async ({ page }) => {
     const toggleBtn = page.getByTestId("toggle-api-log");
-    await toggleBtn.click();
+    await cursorClick(page, toggleBtn);
     await settle(page);
 
     const cardTitle = page.locator("h4", { hasText: "Create GOALS.md" });
@@ -53,10 +54,10 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     const card = cardTitle.locator(
       "xpath=ancestor::div[contains(@class, 'group')]",
     );
-    await card.hover();
+    await cursorHover(page, card);
     await hold(page);
 
-    await card.getByRole("button", { name: "Delete card" }).click();
+    await cursorClick(page, card.getByRole("button", { name: "Delete card" }));
     await settle(page);
 
     await expect(
@@ -72,7 +73,7 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     page,
   }) => {
     const toggleBtn = page.getByTestId("toggle-api-log");
-    await toggleBtn.click();
+    await cursorClick(page, toggleBtn);
     await settle(page);
 
     const backlogColumn = page
@@ -87,17 +88,17 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     const card = cardTitle.locator(
       "xpath=ancestor::div[contains(@class, 'group')]",
     );
-    await card.hover();
+    await cursorHover(page, card);
     await hold(page);
 
-    await card.getByRole("button", { name: "Move card" }).click();
+    await cursorClick(page, card.getByRole("button", { name: "Move card" }));
     await settle(page);
 
     const moveMenu = page.getByTestId("move-menu");
     await expect(moveMenu).toBeVisible();
     await hold(page);
 
-    await page.getByTestId("move-to-in-progress").click();
+    await cursorClick(page, page.getByTestId("move-to-in-progress"));
     await settle(page);
 
     await expect(
@@ -124,11 +125,11 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     page,
   }) => {
     const toggleBtn = page.getByTestId("toggle-api-log");
-    await toggleBtn.click();
+    await cursorClick(page, toggleBtn);
     await settle(page);
 
     const registryToggle = page.getByTestId("api-registry-toggle");
-    await registryToggle.click();
+    await cursorClick(page, registryToggle);
     await settle(page);
     await hold(page);
 
@@ -162,22 +163,25 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     page,
   }) => {
     const toggleBtn = page.getByTestId("toggle-api-log");
-    await toggleBtn.click();
+    await cursorClick(page, toggleBtn);
     await settle(page);
 
     const addColumnButton = page.getByRole("button", { name: /add column/i });
-    await addColumnButton.click();
+    await cursorClick(page, addColumnButton);
     await settle(page);
 
     const colInput = page.getByPlaceholder("Column title...");
+    await cursorClick(page, colInput);
     await colInput.fill("Review");
     await hold(page);
 
-    await page
-      .locator("div")
-      .filter({ has: page.getByPlaceholder("Column title...") })
-      .getByRole("button", { name: "Add column" })
-      .click();
+    await cursorClick(
+      page,
+      page
+        .locator("div")
+        .filter({ has: page.getByPlaceholder("Column title...") })
+        .getByRole("button", { name: "Add column" }),
+    );
     await settle(page);
 
     const reviewColumn = page
@@ -189,12 +193,13 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     await expect(logEntries.first()).toContainText("column.create");
     await hold(page);
 
-    await reviewColumn.getByRole("button", { name: /add card/i }).click();
+    await cursorClick(page, reviewColumn.getByRole("button", { name: /add card/i }));
     await settle(page);
     const cardInput = reviewColumn.getByPlaceholder("Card title...");
+    await cursorClick(page, cardInput);
     await cardInput.fill("Review this PR");
     await hold(page);
-    await reviewColumn.getByRole("button", { name: "Add" }).click();
+    await cursorClick(page, reviewColumn.getByRole("button", { name: "Add" }));
     await settle(page);
 
     await expect(reviewColumn.getByText("Review this PR")).toBeVisible();
@@ -207,10 +212,10 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     const card = cardTitle.locator(
       "xpath=ancestor::div[contains(@class, 'group')]",
     );
-    await card.hover();
+    await cursorHover(page, card);
     await hold(page);
 
-    await card.getByRole("button", { name: "Delete card" }).click();
+    await cursorClick(page, card.getByRole("button", { name: "Delete card" }));
     await settle(page);
 
     await expect(
@@ -236,18 +241,19 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     await settle(page);
 
     const toggleBtn = page.getByTestId("toggle-api-log");
-    await toggleBtn.click();
+    await cursorClick(page, toggleBtn);
     await settle(page);
 
     const backlogColumn = page
       .locator("[data-testid='kanban-column']")
       .filter({ hasText: "Backlog" });
 
-    await backlogColumn.getByRole("button", { name: /add card/i }).click();
+    await cursorClick(page, backlogColumn.getByRole("button", { name: /add card/i }));
     await settle(page);
     const input = backlogColumn.getByPlaceholder("Card title...");
+    await cursorClick(page, input);
     await input.fill("Error check card");
-    await backlogColumn.getByRole("button", { name: "Add" }).click();
+    await cursorClick(page, backlogColumn.getByRole("button", { name: "Add" }));
     await settle(page);
 
     const cardTitle = backlogColumn.locator("h4", {
@@ -256,9 +262,9 @@ test.describe("Tier 2 — Unapi Core & Domain CRUD Proofs", () => {
     const card = cardTitle.locator(
       "xpath=ancestor::div[contains(@class, 'group')]",
     );
-    await card.hover();
+    await cursorHover(page, card);
     await settle(page);
-    await card.getByRole("button", { name: "Delete card" }).click();
+    await cursorClick(page, card.getByRole("button", { name: "Delete card" }));
     await settle(page);
 
     expect(consoleErrors).toEqual([]);
