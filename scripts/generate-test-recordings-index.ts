@@ -39,9 +39,40 @@ type RecordingsIndex = {
 
 const rootDir = join(import.meta.dirname, "..");
 
+function tryStatMtimeMs(path: string): number | null {
+  try {
+    return statSync(path).mtimeMs;
+  } catch {
+    return null;
+  }
+}
+
+function findLatestPlaywrightResultsDir(): string | null {
+  const candidates: { dir: string; mtimeMs: number }[] = [];
+
+  // Jabtrunner convention: `.cache/tests/<run-id>/pw-output/`
+  const testsRoot = join(rootDir, ".cache/tests");
+  if (existsSync(testsRoot)) {
+    for (const entry of readdirSync(testsRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const pwOut = join(testsRoot, entry.name, "pw-output");
+      const m = tryStatMtimeMs(pwOut);
+      if (m != null) candidates.push({ dir: pwOut, mtimeMs: m });
+    }
+  }
+
+  // Legacy / direct Playwright convention.
+  const legacy = join(rootDir, ".cache/tests/playwright-results");
+  const legacyM = tryStatMtimeMs(legacy);
+  if (legacyM != null) candidates.push({ dir: legacy, mtimeMs: legacyM });
+
+  candidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
+  return candidates[0]?.dir ?? null;
+}
+
 const sourceDir = process.env.PLAYWRIGHT_RESULTS_DIR
   ? join(rootDir, process.env.PLAYWRIGHT_RESULTS_DIR)
-  : join(rootDir, ".cache/tests/playwright-results");
+  : (findLatestPlaywrightResultsDir() ?? join(rootDir, ".cache/tests/test-scenario/pw-output"));
 
 const outDir = process.env.TEST_RECORDINGS_OUT_DIR
   ? join(rootDir, process.env.TEST_RECORDINGS_OUT_DIR)
