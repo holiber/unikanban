@@ -17,6 +17,7 @@ import {
   UpdateCardInput,
   DeleteCardInput,
   MoveCardInput,
+  ImportMermaidInput,
 } from "./schemas.js";
 
 export function createKanbanProcedures(store: KanbanStore) {
@@ -125,11 +126,19 @@ export function createKanbanProcedures(store: KanbanStore) {
       ),
   });
 
+  const importMermaid = defineProcedure({
+    meta: { description: "Import a kanban board from Mermaid syntax", tags: ["board", "write"] },
+    input: ImportMermaidInput,
+    output: BoardSchema,
+    handler: (input) => store.importMermaid(input.mermaid),
+  });
+
   return {
     "board.get": getBoard,
     "board.list": listBoards,
     "board.create": createBoard,
     "board.delete": deleteBoard,
+    "board.importMermaid": importMermaid,
     "column.create": createColumn,
     "column.update": updateColumn,
     "column.delete": deleteColumn,

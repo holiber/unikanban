@@ -87,6 +87,10 @@ export const DeleteBoardInput = z.object({
 
 export const ListBoardsInput = z.object({});
 
+export const ImportMermaidInput = z.object({
+  mermaid: z.string().min(1),
+});
+
 export const SuccessResult = z.object({
   success: z.boolean(),
 });
