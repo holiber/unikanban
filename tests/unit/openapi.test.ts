@@ -23,8 +23,9 @@ describe("OpenAPI Generation", () => {
     const paths = Object.keys(spec.paths);
     expect(paths).toContain("/api/call/board.create");
     expect(paths).toContain("/api/call/board.get");
+    expect(paths).toContain("/api/call/board.importMermaid");
     expect(paths).toContain("/api/call/card.move");
-    expect(paths.length).toBe(11);
+    expect(paths.length).toBe(12);
   });
 
   it("includes request/response schemas for each endpoint", () => {
@@ -67,8 +68,9 @@ describe("AsyncAPI Generation", () => {
     const spec = generateAsyncApiSpec(router);
     const channels = Object.keys(spec.channels);
     expect(channels).toContain("board.create");
+    expect(channels).toContain("board.importMermaid");
     expect(channels).toContain("card.move");
-    expect(channels.length).toBe(11);
+    expect(channels.length).toBe(12);
   });
 
   it("includes publish/subscribe messages", () => {

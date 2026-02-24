@@ -1,5 +1,6 @@
 import type { Board, Card, Column } from "./schemas.js";
 import { EventBus } from "../unapi/events.js";
+import { parseMermaidKanban } from "./mermaid.js";
 
 export type KanbanEvents = {
   "board:created": Board;
@@ -165,5 +166,17 @@ export class KanbanStore {
       targetColumnId,
     });
     return card;
+  }
+
+  importMermaid(mermaid: string): Board {
+    const seed = parseMermaidKanban(mermaid);
+    const board = this.createBoard(seed.title);
+    for (const col of seed.columns) {
+      const column = this.createColumn(board.id, col.title);
+      for (const card of col.cards) {
+        this.createCard(board.id, column.id, card);
+      }
+    }
+    return this.getBoard(board.id);
   }
 }

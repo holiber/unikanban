@@ -79,13 +79,36 @@ export function createRouter<T extends RouterShape>(
 
 export function createClient<T extends RouterShape>(
   router: Router<T>,
+  options?: { flat?: boolean },
+): UnapiClient<T> {
+  return createCallerClient(
+    router.procedureIds,
+    (procedureName, input) => router.call(procedureName as any, input),
+    { aliases: router.aliases, flat: options?.flat },
+  ) as UnapiClient<T>;
+}
+
+export type UnapiCaller = (
+  procedureName: string,
+  input: unknown,
+) => Promise<unknown>;
+
+export function createCallerClient<T extends RouterShape>(
+  procedureIds: readonly (string & keyof T)[],
+  call: UnapiCaller,
+  options?: { aliases?: Record<string, string>; flat?: boolean },
 ): UnapiClient<T> {
   const client: Record<string, any> = {};
 
-  // Canonical IDs: `board.create` -> client.board.create(...) + client["board.create"](...)
-  for (const id of router.procedureIds) {
-    const fn = (input: unknown) => router.call(id, input);
-    client[id] = fn;
+  client.call = (id: string, input: unknown) => call(id, input);
+
+  // Canonical IDs: `board.create` -> client.board.create(...)
+  for (const id of procedureIds) {
+    const fn = (input: unknown) => call(String(id), input);
+
+    if (options?.flat) {
+      client[id] = fn;
+    }
 
     const segments = String(id).split(".");
     let cursor = client;
@@ -97,9 +120,9 @@ export function createClient<T extends RouterShape>(
     cursor[segments[segments.length - 1]!] = fn;
   }
 
-  // Aliases: keep backward-compatible flat names (e.g. `createBoard`)
-  for (const [alias, canonical] of Object.entries(router.aliases)) {
-    client[alias] = (input: unknown) => router.call(canonical, input);
+  // Optional aliases: for compatibility only, never primary.
+  for (const [alias, canonical] of Object.entries(options?.aliases ?? {})) {
+    client[alias] = (input: unknown) => call(canonical, input);
   }
 
   return client as UnapiClient<T>;
