@@ -92,6 +92,12 @@ A flat variant is optional for compatibility:
 
 - `client["board.create"](...)`
 
+In this repo, the flat variant is **opt-in** to avoid duplicating method surfaces.
+Enable it explicitly when needed:
+
+- `createClient(router, { flat: true })`
+- `createCallerClient(ids, call, { flat: true })`
+
 ### Deterministic mapping
 
 - Nesting is purely mechanical from the ID split

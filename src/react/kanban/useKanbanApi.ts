@@ -1,12 +1,10 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import {
   createKanbanApi,
-  KANBAN_PROCEDURE_IDS,
   type KanbanProcedures,
 } from "../../domain/index.js";
 import type { Board, Card } from "../../domain/schemas.js";
-import type { RouterDescription, UnapiClient } from "../../unapi/types.js";
-import { createCallerClient } from "../../unapi/index.js";
+import type { RouterDescription, InferInput, InferOutput } from "../../unapi/types.js";
 import { createHttpCaller, fetchHttpDescription } from "../../transports/http-client.js";
 
 export interface ApiLogEntry {
@@ -49,24 +47,14 @@ function getModeFromLocation(): { mode: Mode; apiBaseUrl?: string } {
 export function useKanbanApi() {
   const config = useMemo(() => getModeFromLocation(), []);
   const boardIdRef = useRef<string>("");
-  const clientRef = useRef<UnapiClient<KanbanProcedures> | null>(null);
   const localApiRef = useRef<ReturnType<typeof createKanbanApi> | null>(null);
 
-  if (!clientRef.current) {
-    if (config.mode === "local") {
-      const api = createKanbanApi();
-      localApiRef.current = api;
-      clientRef.current = api.client as any;
-    } else {
-      const caller = createHttpCaller({ apiBaseUrl: config.apiBaseUrl! });
-      clientRef.current = createCallerClient<KanbanProcedures>(
-        KANBAN_PROCEDURE_IDS,
-        caller,
-      );
-    }
-  }
+  type KanbanCall = <K extends keyof KanbanProcedures & string>(
+    id: K,
+    input: InferInput<KanbanProcedures[K]>,
+  ) => Promise<InferOutput<KanbanProcedures[K]>>;
 
-  const client = clientRef.current!;
+  const [call, setCall] = useState<KanbanCall | null>(null);
 
   const [board, setBoard] = useState<Board>({
     id: "",
@@ -85,28 +73,34 @@ export function useKanbanApi() {
   }, []);
 
   const refresh = useCallback(async () => {
+    if (!call) return;
     if (!boardIdRef.current) return;
-    const next = await client.board.get({ boardId: boardIdRef.current });
+    const next = await call("board.get", { boardId: boardIdRef.current } as any);
     setBoard(next);
-  }, [client]);
+  }, [call]);
 
   useEffect(() => {
     let cancelled = false;
 
     async function ensureSeededBoard() {
       if (config.mode === "remote") {
+        const caller = createHttpCaller({ apiBaseUrl: config.apiBaseUrl! });
+        const remoteCall: KanbanCall = (async (id: any, input: any) =>
+          caller(String(id), input)) as any;
+
         try {
           const desc = await fetchHttpDescription({ apiBaseUrl: config.apiBaseUrl! });
           if (!cancelled) setRouterDescription(desc);
         } catch {
           // ignore (UI still works without registry)
         }
+        if (!cancelled) setCall(() => remoteCall);
 
         const key = `unikanban:remote:boardId:${config.apiBaseUrl}`;
         const saved = window.localStorage.getItem(key) ?? "";
         if (saved) {
           try {
-            const existing = await client.board.get({ boardId: saved });
+            const existing = await remoteCall("board.get", { boardId: saved } as any);
             if (cancelled) return;
             boardIdRef.current = saved;
             setBoard(existing);
@@ -116,7 +110,7 @@ export function useKanbanApi() {
           }
         }
 
-        const created = await client.board.importMermaid({ mermaid: DEMO_MERMAID });
+        const created = await remoteCall("board.importMermaid", { mermaid: DEMO_MERMAID } as any);
         if (cancelled) return;
         boardIdRef.current = created.id;
         window.localStorage.setItem(key, created.id);
@@ -126,10 +120,13 @@ export function useKanbanApi() {
 
       // local mode
       const localApi = localApiRef.current;
-      if (localApi) {
-        setRouterDescription(localApi.router.describe());
+      const api = localApi ?? createKanbanApi();
+      localApiRef.current = api;
+      if (!cancelled) {
+        setRouterDescription(api.router.describe());
+        setCall(() => api.router.call.bind(api.router) as any);
       }
-      const created = await client.board.importMermaid({ mermaid: DEMO_MERMAID });
+      const created = await api.router.call("board.importMermaid" as any, { mermaid: DEMO_MERMAID });
       if (cancelled) return;
       boardIdRef.current = created.id;
       setBoard(created);
@@ -139,49 +136,55 @@ export function useKanbanApi() {
     return () => {
       cancelled = true;
     };
-  }, [client, config.mode, config.apiBaseUrl]);
+  }, [config.mode, config.apiBaseUrl]);
 
   const addCard = useCallback(async (columnId: string, title: string) => {
+    if (!call) return;
     const input = { boardId: boardIdRef.current, columnId, title };
-    const card = await client.card.create(input);
+    const card = await call("card.create", input as any);
     logCall("card.create", input, card);
     await refresh();
-  }, [client, logCall, refresh]);
+  }, [call, logCall, refresh]);
 
   const deleteCard = useCallback(async (columnId: string, cardId: string) => {
+    if (!call) return;
     const input = { boardId: boardIdRef.current, columnId, cardId };
-    const result = await client.card.delete(input);
+    const result = await call("card.delete", input as any);
     logCall("card.delete", input, result);
     await refresh();
-  }, [client, logCall, refresh]);
+  }, [call, logCall, refresh]);
 
   const addColumn = useCallback(async (title: string) => {
+    if (!call) return;
     const input = { boardId: boardIdRef.current, title };
-    const col = await client.column.create(input);
+    const col = await call("column.create", input as any);
     logCall("column.create", input, col);
     await refresh();
-  }, [client, logCall, refresh]);
+  }, [call, logCall, refresh]);
 
   const deleteColumn = useCallback(async (columnId: string) => {
+    if (!call) return;
     const input = { boardId: boardIdRef.current, columnId };
-    const result = await client.column.delete(input);
+    const result = await call("column.delete", input as any);
     logCall("column.delete", input, result);
     await refresh();
-  }, [client, logCall, refresh]);
+  }, [call, logCall, refresh]);
 
   const moveCard = useCallback(async (sourceColumnId: string, targetColumnId: string, cardId: string) => {
+    if (!call) return;
     const input = { boardId: boardIdRef.current, sourceColumnId, targetColumnId, cardId };
-    const card = await client.card.move(input);
+    const card = await call("card.move", input as any);
     logCall("card.move", input, card);
     await refresh();
-  }, [client, logCall, refresh]);
+  }, [call, logCall, refresh]);
 
   const updateCard = useCallback(async (columnId: string, cardId: string, updates: { title?: string; description?: string; priority?: Card["priority"] }) => {
+    if (!call) return;
     const input = { boardId: boardIdRef.current, columnId, cardId, ...updates };
-    const card = await client.card.update(input);
+    const card = await call("card.update", input as any);
     logCall("card.update", input, card);
     await refresh();
-  }, [client, logCall, refresh]);
+  }, [call, logCall, refresh]);
 
   return {
     board,

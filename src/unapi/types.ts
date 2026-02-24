@@ -79,6 +79,12 @@ export type NestedClientShape<T extends RouterShape> = UnionToIntersection<
   }[keyof T & string]
 >;
 
-export type UnapiClient<T extends RouterShape> = NestedClientShape<T> &
-  FlatClientShape<T> &
-  Record<string, (input: unknown) => Promise<unknown>>;
+export type UnapiClient<T extends RouterShape> = NestedClientShape<T> & {
+  call<K extends keyof T & string>(
+    id: K,
+    input: InferInput<T[K]>,
+  ): Promise<InferOutput<T[K]>>;
+};
+
+export type UnapiClientWithFlat<T extends RouterShape> = UnapiClient<T> &
+  FlatClientShape<T>;

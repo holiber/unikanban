@@ -9,21 +9,6 @@ export * from "./schemas.js";
 
 export type KanbanProcedures = ReturnType<typeof createKanbanProcedures>;
 
-export const KANBAN_PROCEDURE_IDS: readonly (keyof KanbanProcedures & string)[] = [
-  "board.get",
-  "board.list",
-  "board.create",
-  "board.delete",
-  "board.importMermaid",
-  "column.create",
-  "column.update",
-  "column.delete",
-  "card.create",
-  "card.update",
-  "card.delete",
-  "card.move",
-];
-
 export function createKanbanApi(store?: KanbanStore) {
   const kanbanStore = store ?? new KanbanStore();
   const procedures = createKanbanProcedures(kanbanStore);

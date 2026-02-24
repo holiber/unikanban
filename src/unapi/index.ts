@@ -15,6 +15,7 @@ export type {
   FlatClientShape,
   NestedClientShape,
   UnapiClient,
+  UnapiClientWithFlat,
 } from "./types.js";
 export type { EventHandler } from "./events.js";
 export { extractFields, zodToJsonSchema } from "./schema-utils.js";
