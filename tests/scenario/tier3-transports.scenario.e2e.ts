@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { settle, hold, showCursor } from "../helpers.js";
+import { cursorClick, hold, settle, showCursor } from "../helpers.js";
 
 test.describe("Tier 3 — Transports & UI Integration Proofs", () => {
   test.beforeEach(async ({ page }) => {
@@ -21,33 +21,36 @@ test.describe("Tier 3 — Transports & UI Integration Proofs", () => {
     const themeToggle = page.getByRole("button", { name: /switch to/i });
     await expect(themeToggle).toBeVisible();
 
-    await themeToggle.click();
+    await cursorClick(page, themeToggle);
     await settle(page);
     await hold(page);
 
-    await themeToggle.click();
+    await cursorClick(page, themeToggle);
     await settle(page);
     await hold(page);
   });
 
   test("Full board CRUD workflow through the React UI", async ({ page }) => {
     const toggleBtn = page.getByTestId("toggle-api-log");
-    await toggleBtn.click();
+    await cursorClick(page, toggleBtn);
     await settle(page);
 
     const addColumnButton = page.getByRole("button", { name: /add column/i });
-    await addColumnButton.click();
+    await cursorClick(page, addColumnButton);
     await settle(page);
 
     const colInput = page.getByPlaceholder("Column title...");
+    await cursorClick(page, colInput);
     await colInput.fill("Tier3 Column");
     await hold(page);
 
-    await page
-      .locator("div")
-      .filter({ has: page.getByPlaceholder("Column title...") })
-      .getByRole("button", { name: "Add column" })
-      .click();
+    await cursorClick(
+      page,
+      page
+        .locator("div")
+        .filter({ has: page.getByPlaceholder("Column title...") })
+        .getByRole("button", { name: "Add column" }),
+    );
     await settle(page);
 
     const newColumn = page
@@ -56,11 +59,12 @@ test.describe("Tier 3 — Transports & UI Integration Proofs", () => {
     await expect(newColumn).toBeVisible();
     await hold(page);
 
-    await newColumn.getByRole("button", { name: /add card/i }).click();
+    await cursorClick(page, newColumn.getByRole("button", { name: /add card/i }));
     await settle(page);
     const cardInput = newColumn.getByPlaceholder("Card title...");
+    await cursorClick(page, cardInput);
     await cardInput.fill("HTTP Transport Task");
-    await newColumn.getByRole("button", { name: "Add" }).click();
+    await cursorClick(page, newColumn.getByRole("button", { name: "Add" }));
     await settle(page);
 
     await expect(newColumn.getByText("HTTP Transport Task")).toBeVisible();
@@ -91,11 +95,12 @@ test.describe("Tier 3 — Transports & UI Integration Proofs", () => {
       .locator("[data-testid='kanban-column']")
       .filter({ hasText: "Backlog" });
 
-    await backlogColumn.getByRole("button", { name: /add card/i }).click();
+    await cursorClick(page, backlogColumn.getByRole("button", { name: /add card/i }));
     await settle(page);
     const input = backlogColumn.getByPlaceholder("Card title...");
+    await cursorClick(page, input);
     await input.fill("No-error card");
-    await backlogColumn.getByRole("button", { name: "Add" }).click();
+    await cursorClick(page, backlogColumn.getByRole("button", { name: "Add" }));
     await settle(page);
 
     expect(consoleErrors).toEqual([]);
