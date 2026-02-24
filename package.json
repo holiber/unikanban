@@ -12,6 +12,9 @@
   "scripts": {
     "dev": "vite",
     "dev:tui": "node --import tsx src/tui/main.tsx",
+    "cli": "node --import tsx src/cli/main.ts",
+    "mcp": "node --import tsx src/transports/mcp-main.ts",
+    "http": "node --import tsx src/transports/http-main.ts",
     "build": "tsc",
     "build:app": "vite build",
     "build:tui": "tsc -p tsconfig.tui.json",
