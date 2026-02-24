@@ -12,7 +12,11 @@ type TrieNode = {
 
 export function createCli<T extends RouterShape>(
   router: Router<T>,
-  options?: { scriptName?: string; version?: string },
+  options?: {
+    scriptName?: string;
+    version?: string;
+    call?: (procedureId: string, input: Record<string, any>) => Promise<any>;
+  },
 ) {
   const desc = router.describe();
   let cli = yargs(hideBin(process.argv))
@@ -22,7 +26,7 @@ export function createCli<T extends RouterShape>(
 
   const root = buildTrie(desc.procedures);
   for (const [seg, node] of root.children) {
-    cli = registerNode(cli, router, seg, node) as any;
+    cli = registerNode(cli, router, seg, node, options?.call) as any;
   }
 
   cli = cli.demandCommand(1, "Please specify a command").strict();
@@ -55,12 +59,13 @@ function registerNode<T extends RouterShape>(
   router: Router<T>,
   segment: string,
   node: TrieNode,
+  callOverride?: (procedureId: string, input: Record<string, any>) => Promise<any>,
 ): any {
   const hasChildren = node.children.size > 0;
   const isLeaf = Boolean(node.proc);
 
   if (isLeaf && !hasChildren) {
-    return registerLeaf(y, router, segment, node.proc!);
+    return registerLeaf(y, router, segment, node.proc!, callOverride);
   }
 
   // Group / namespace node (supports `board create`, `admin user create`, etc.)
@@ -69,12 +74,12 @@ function registerNode<T extends RouterShape>(
     `Commands under ${segment}`,
     (yy: any) => {
       for (const [childSeg, childNode] of node.children) {
-        registerNode(yy, router, childSeg, childNode);
+        registerNode(yy, router, childSeg, childNode, callOverride);
       }
 
       if (isLeaf) {
         // If a procedure ends at this node, expose it as `segment call`.
-        registerLeaf(yy, router, "call", node.proc!);
+        registerLeaf(yy, router, "call", node.proc!, callOverride);
       }
 
       return yy.demandCommand(1, "Please specify a command").strict();
@@ -88,9 +93,14 @@ function registerLeaf<T extends RouterShape>(
   router: Router<T>,
   command: string,
   proc: ProcDesc,
+  callOverride?: (procedureId: string, input: Record<string, any>) => Promise<any>,
 ): any {
   const procedure = router.procedures[proc.id as keyof T];
   const fields = extractFields(procedure.input);
+  const call =
+    callOverride ??
+    ((procedureId: string, input: Record<string, any>) =>
+      router.call(procedureId as any, input as any));
 
   return y.command(
     command,
@@ -120,7 +130,7 @@ function registerLeaf<T extends RouterShape>(
         }
       }
       try {
-        const result = await router.call(proc.id, input);
+        const result = await call(proc.id, input);
         console.log(JSON.stringify(result, null, 2));
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
