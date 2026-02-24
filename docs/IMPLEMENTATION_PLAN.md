@@ -22,13 +22,13 @@ Set up the project foundation so that agents and developers can start building i
 
 Build the core "Unapi" definition layer and the Kanban board business logic.
 
-- [ ] **Design the Unapi schema definition format** — a TypeScript-first way to declare API procedures (inputs, outputs, metadata) that serves as the single source of truth
-- [ ] **Implement Unapi runtime** — procedure registry, input validation (e.g. Zod), type inference (tRPC-style), self-documentation capabilities
-- [ ] **Kanban domain model** — Board, Column, Card entities with CRUD operations, expressed as Unapi procedures
-- [ ] **Programmatic client library** — importable API client with full TypeScript types inferred from Unapi definitions
-- [ ] **Unit tests for domain** — comprehensive tests for all Kanban operations
-- [ ] **Streaming / pub-sub foundation** — event emitter or observable pattern for real-time board updates
-- [ ] **Video proofs** — scenario tests demonstrating Unapi core operations and domain model CRUD
+- [x] **Design the Unapi schema definition format** — `defineProcedure()` with Zod schemas for inputs/outputs, metadata for docs; single source of truth for types, validation, and documentation
+- [x] **Implement Unapi runtime** — `Router` class with procedure registry, Zod input/output validation, tRPC-style type inference (`InferInput`/`InferOutput`), `router.describe()` self-documentation
+- [x] **Kanban domain model** — Board, Column, Card entities with full CRUD operations (11 procedures), backed by `KanbanStore` with event emission
+- [x] **Programmatic client library** — `createClient(router)` returns a type-safe proxy with full TypeScript inference from Unapi definitions
+- [x] **Unit tests for domain** — 46 unit tests covering Unapi core, EventBus, KanbanStore CRUD, client API, and self-documentation
+- [x] **Streaming / pub-sub foundation** — typed `EventBus<T>` with on/once/off/emit, integrated into KanbanStore for real-time board events
+- [x] **Video proofs** — 6 scenario tests demonstrating API log, procedure registry, card CRUD, move card, full workflow
 
 ---
 
