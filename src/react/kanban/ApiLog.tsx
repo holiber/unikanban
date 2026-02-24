@@ -55,9 +55,9 @@ export function ApiLog({ entries, routerDescription }: ApiLogProps) {
           </summary>
           <div className="mt-2 grid grid-cols-2 gap-1">
             {routerDescription.procedures.map((proc) => (
-              <div key={proc.name} className="flex items-center gap-1.5 py-0.5" data-testid="api-registry-entry">
-                <span className="font-mono font-medium text-text-primary">{proc.name}</span>
-                <span className="text-text-tertiary">— {proc.description}</span>
+              <div key={proc.id} className="flex items-center gap-1.5 py-0.5" data-testid="api-registry-entry">
+                <span className="font-mono font-medium text-text-primary">{proc.id}</span>
+                <span className="text-text-tertiary">— {proc.meta.description}</span>
               </div>
             ))}
           </div>

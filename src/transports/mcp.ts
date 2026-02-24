@@ -40,11 +40,11 @@ export function createMcpServer<T extends RouterShape>(
   function buildToolList() {
     const desc = router.describe();
     return desc.procedures.map((proc) => {
-      const procedure = router.procedures[proc.name];
+      const procedure = router.procedures[proc.id as keyof T];
       const inputJsonSchema = zodToJsonSchema(procedure.input);
       return {
-        name: proc.name,
-        description: proc.description,
+        name: proc.id,
+        description: proc.meta.description,
         inputSchema: inputJsonSchema,
       };
     });

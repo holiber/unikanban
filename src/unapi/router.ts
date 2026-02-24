@@ -4,59 +4,103 @@ import type {
   ProcedureInfo,
   InferInput,
   InferOutput,
-  ClientShape,
+  UnapiClient,
 } from "./types.js";
 
 export class Router<T extends RouterShape> {
   readonly procedures: T;
+  readonly aliases: Readonly<Record<string, string>>;
 
-  constructor(procedures: T) {
+  constructor(procedures: T, options?: { aliases?: Record<string, string> }) {
     this.procedures = procedures;
+    this.aliases = options?.aliases ?? {};
+  }
+
+  private resolveId(nameOrAlias: string): string {
+    return this.aliases[nameOrAlias] ?? nameOrAlias;
+  }
+
+  hasProcedure(nameOrAlias: string): boolean {
+    const id = this.resolveId(nameOrAlias);
+    return Boolean((this.procedures as Record<string, unknown>)[id]);
   }
 
   async call<K extends string & keyof T>(
-    name: K,
+    nameOrId: K,
     input: InferInput<T[K]>,
-  ): Promise<InferOutput<T[K]>> {
-    const procedure = this.procedures[name];
+  ): Promise<InferOutput<T[K]>>;
+  async call(nameOrAlias: string, input: unknown): Promise<unknown>;
+  async call(nameOrAlias: string, input: unknown): Promise<unknown> {
+    const id = this.resolveId(nameOrAlias);
+    const procedure = (this.procedures as Record<string, any>)[id];
     if (!procedure) {
-      throw new Error(`Unknown procedure: ${name}`);
+      throw new Error(`Unknown procedure: ${nameOrAlias}`);
     }
 
     const parsed = procedure.input.parse(input);
     const result = await procedure.handler(parsed);
-    return procedure.output.parse(result) as InferOutput<T[K]>;
+    return procedure.output.parse(result);
   }
 
   describe(): RouterDescription {
+    const aliasToCanonical = this.aliases;
+    const canonicalToAliases: Record<string, string[]> = {};
+    for (const [alias, canonical] of Object.entries(aliasToCanonical)) {
+      (canonicalToAliases[canonical] ??= []).push(alias);
+    }
+
     const procedures: ProcedureInfo[] = Object.entries(this.procedures).map(
-      ([name, proc]) => ({
-        name,
-        description: proc.meta.description,
-        tags: proc.meta.tags ?? [],
+      ([id, proc]) => ({
+        id,
+        meta: proc.meta,
         inputSchema: proc.input,
         outputSchema: proc.output,
+        aliases: canonicalToAliases[id],
       }),
     );
     return { procedures };
   }
 
-  get procedureNames(): (string & keyof T)[] {
+  get procedureIds(): (string & keyof T)[] {
     return Object.keys(this.procedures) as (string & keyof T)[];
+  }
+
+  get procedureNames(): string[] {
+    return [...this.procedureIds, ...Object.keys(this.aliases)];
   }
 }
 
-export function createRouter<T extends RouterShape>(procedures: T): Router<T> {
-  return new Router(procedures);
+export function createRouter<T extends RouterShape>(
+  procedures: T,
+  options?: { aliases?: Record<string, string> },
+): Router<T> {
+  return new Router(procedures, options);
 }
 
 export function createClient<T extends RouterShape>(
   router: Router<T>,
-): ClientShape<T> {
-  const client = {} as ClientShape<T>;
-  for (const name of router.procedureNames) {
-    (client as Record<string, Function>)[name] = (input: unknown) =>
-      router.call(name, input as InferInput<T[typeof name]>);
+): UnapiClient<T> {
+  const client: Record<string, any> = {};
+
+  // Canonical IDs: `board.create` -> client.board.create(...) + client["board.create"](...)
+  for (const id of router.procedureIds) {
+    const fn = (input: unknown) => router.call(id, input);
+    client[id] = fn;
+
+    const segments = String(id).split(".");
+    let cursor = client;
+    for (let i = 0; i < segments.length - 1; i++) {
+      const seg = segments[i]!;
+      cursor[seg] ??= {};
+      cursor = cursor[seg];
+    }
+    cursor[segments[segments.length - 1]!] = fn;
   }
-  return client;
+
+  // Aliases: keep backward-compatible flat names (e.g. `createBoard`)
+  for (const [alias, canonical] of Object.entries(router.aliases)) {
+    client[alias] = (input: unknown) => router.call(canonical, input);
+  }
+
+  return client as UnapiClient<T>;
 }

@@ -24,21 +24,21 @@ export function generateOpenApiSpec<T extends RouterShape>(
   const schemas: Record<string, any> = {};
 
   for (const proc of desc.procedures) {
-    const procedure = router.procedures[proc.name];
+    const procedure = router.procedures[proc.id as keyof T];
     const inputSchema = zodToJsonSchema(procedure.input);
     const outputSchema = zodToJsonSchema(procedure.output);
 
-    const inputSchemaName = `${capitalize(proc.name)}Input`;
-    const outputSchemaName = `${capitalize(proc.name)}Output`;
+    const inputSchemaName = `${schemaNameFromId(proc.id)}Input`;
+    const outputSchemaName = `${schemaNameFromId(proc.id)}Output`;
     schemas[inputSchemaName] = inputSchema;
     schemas[outputSchemaName] = outputSchema;
 
-    const path = `${basePath}/call/${proc.name}`;
+    const path = `${basePath}/call/${proc.id}`;
     paths[path] = {
       post: {
-        operationId: proc.name,
-        summary: proc.description,
-        tags: proc.tags,
+        operationId: proc.id,
+        summary: proc.meta.description,
+        tags: proc.meta.tags ?? [],
         requestBody: {
           required: true,
           content: {
@@ -104,20 +104,20 @@ export function generateAsyncApiSpec<T extends RouterShape>(
   const channels: Record<string, any> = {};
 
   for (const proc of desc.procedures) {
-    const procedure = router.procedures[proc.name];
+    const procedure = router.procedures[proc.id as keyof T];
     const inputSchema = zodToJsonSchema(procedure.input);
     const outputSchema = zodToJsonSchema(procedure.output);
 
-    channels[proc.name] = {
-      description: proc.description,
+    channels[proc.id] = {
+      description: proc.meta.description,
       subscribe: {
-        summary: `Response from ${proc.name}`,
+        summary: `Response from ${proc.id}`,
         message: {
           payload: outputSchema,
         },
       },
       publish: {
-        summary: `Request to ${proc.name}`,
+        summary: `Request to ${proc.id}`,
         message: {
           payload: inputSchema,
         },
@@ -134,4 +134,16 @@ export function generateAsyncApiSpec<T extends RouterShape>(
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function schemaNameFromId(id: string): string {
+  // OpenAPI component keys must be safe strings; keep it deterministic.
+  const safe = id
+    .replace(/[^a-zA-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return safe
+    .split("_")
+    .filter(Boolean)
+    .map(capitalize)
+    .join("");
 }

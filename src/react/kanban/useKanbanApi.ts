@@ -84,43 +84,43 @@ export function useKanbanApi() {
 
   const addCard = useCallback(async (columnId: string, title: string) => {
     const input = { boardId: boardIdRef.current, columnId, title };
-    const card = await api.client.createCard(input);
-    logCall("createCard", input, card);
+    const card = await api.client.card.create(input);
+    logCall("card.create", input, card);
     refresh();
   }, [api, logCall, refresh]);
 
   const deleteCard = useCallback(async (columnId: string, cardId: string) => {
     const input = { boardId: boardIdRef.current, columnId, cardId };
-    const result = await api.client.deleteCard(input);
-    logCall("deleteCard", input, result);
+    const result = await api.client.card.delete(input);
+    logCall("card.delete", input, result);
     refresh();
   }, [api, logCall, refresh]);
 
   const addColumn = useCallback(async (title: string) => {
     const input = { boardId: boardIdRef.current, title };
-    const col = await api.client.createColumn(input);
-    logCall("createColumn", input, col);
+    const col = await api.client.column.create(input);
+    logCall("column.create", input, col);
     refresh();
   }, [api, logCall, refresh]);
 
   const deleteColumn = useCallback(async (columnId: string) => {
     const input = { boardId: boardIdRef.current, columnId };
-    const result = await api.client.deleteColumn(input);
-    logCall("deleteColumn", input, result);
+    const result = await api.client.column.delete(input);
+    logCall("column.delete", input, result);
     refresh();
   }, [api, logCall, refresh]);
 
   const moveCard = useCallback(async (sourceColumnId: string, targetColumnId: string, cardId: string) => {
     const input = { boardId: boardIdRef.current, sourceColumnId, targetColumnId, cardId };
-    const card = await api.client.moveCard(input);
-    logCall("moveCard", input, card);
+    const card = await api.client.card.move(input);
+    logCall("card.move", input, card);
     refresh();
   }, [api, logCall, refresh]);
 
   const updateCard = useCallback(async (columnId: string, cardId: string, updates: { title?: string; description?: string; priority?: Card["priority"] }) => {
     const input = { boardId: boardIdRef.current, columnId, cardId, ...updates };
-    const card = await api.client.updateCard(input);
-    logCall("updateCard", input, card);
+    const card = await api.client.card.update(input);
+    logCall("card.update", input, card);
     refresh();
   }, [api, logCall, refresh]);
 

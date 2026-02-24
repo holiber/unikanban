@@ -69,13 +69,13 @@ describe("Router", () => {
     const desc = router.describe();
     expect(desc.procedures).toHaveLength(2);
 
-    const addDesc = desc.procedures.find((p) => p.name === "add")!;
-    expect(addDesc.description).toBe("Add two numbers");
-    expect(addDesc.tags).toEqual([]);
+    const addDesc = desc.procedures.find((p) => p.id === "add")!;
+    expect(addDesc.meta.description).toBe("Add two numbers");
+    expect(addDesc.meta.tags ?? []).toEqual([]);
 
-    const greetDesc = desc.procedures.find((p) => p.name === "greet")!;
-    expect(greetDesc.description).toBe("Greet a person");
-    expect(greetDesc.tags).toEqual(["string"]);
+    const greetDesc = desc.procedures.find((p) => p.id === "greet")!;
+    expect(greetDesc.meta.description).toBe("Greet a person");
+    expect(greetDesc.meta.tags ?? []).toEqual(["string"]);
   });
 });
 

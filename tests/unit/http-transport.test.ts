@@ -26,13 +26,13 @@ describe("HTTP Transport", () => {
     const data = await res.json();
     expect(data.procedures).toBeDefined();
     expect(data.procedures.length).toBeGreaterThan(0);
-    const names = data.procedures.map((p: any) => p.name);
-    expect(names).toContain("createBoard");
-    expect(names).toContain("getBoard");
+    const ids = data.procedures.map((p: any) => p.id);
+    expect(ids).toContain("board.create");
+    expect(ids).toContain("board.get");
   });
 
-  it("POST /api/call/createBoard creates a board", async () => {
-    const res = await fetch(`${baseUrl}/api/call/createBoard`, {
+  it("POST /api/call/board.create creates a board", async () => {
+    const res = await fetch(`${baseUrl}/api/call/board.create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: "HTTP Test Board" }),
@@ -55,7 +55,7 @@ describe("HTTP Transport", () => {
   });
 
   it("returns 400 for invalid JSON body", async () => {
-    const res = await fetch(`${baseUrl}/api/call/createBoard`, {
+    const res = await fetch(`${baseUrl}/api/call/board.create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: "not-json",
@@ -66,7 +66,7 @@ describe("HTTP Transport", () => {
   });
 
   it("handles CORS preflight", async () => {
-    const res = await fetch(`${baseUrl}/api/call/createBoard`, {
+    const res = await fetch(`${baseUrl}/api/call/board.create`, {
       method: "OPTIONS",
     });
     expect(res.status).toBe(204);

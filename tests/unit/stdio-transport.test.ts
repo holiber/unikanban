@@ -33,14 +33,14 @@ describe("Stdio Transport", () => {
 
   it("handles list method", async () => {
     const resp = await sendAndCollect({ id: 1, method: "list" });
-    expect(resp.result.procedures).toContain("createBoard");
-    expect(resp.result.procedures).toContain("moveCard");
+    expect(resp.result.procedures).toContain("board.create");
+    expect(resp.result.procedures).toContain("card.move");
   });
 
   it("calls a procedure", async () => {
     const resp = await sendAndCollect({
       id: 1,
-      method: "createBoard",
+      method: "board.create",
       params: { title: "Stdio Board" },
     });
     expect(resp.result.title).toBe("Stdio Board");

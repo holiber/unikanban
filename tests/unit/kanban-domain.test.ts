@@ -241,16 +241,16 @@ describe("createKanbanApi (client)", () => {
   it("performs full CRUD workflow through the client", async () => {
     const { client } = createKanbanApi();
 
-    const board = await client.createBoard({ title: "Sprint 1" });
+    const board = await client.board.create({ title: "Sprint 1" });
     expect(board.title).toBe("Sprint 1");
 
-    const col = await client.createColumn({
+    const col = await client.column.create({
       boardId: board.id,
       title: "Backlog",
     });
     expect(col.title).toBe("Backlog");
 
-    const card = await client.createCard({
+    const card = await client.card.create({
       boardId: board.id,
       columnId: col.id,
       title: "Write tests",
@@ -258,7 +258,7 @@ describe("createKanbanApi (client)", () => {
     });
     expect(card.title).toBe("Write tests");
 
-    const updatedCard = await client.updateCard({
+    const updatedCard = await client.card.update({
       boardId: board.id,
       columnId: col.id,
       cardId: card.id,
@@ -266,42 +266,42 @@ describe("createKanbanApi (client)", () => {
     });
     expect(updatedCard.title).toBe("Write comprehensive tests");
 
-    const fetched = await client.getBoard({ boardId: board.id });
+    const fetched = await client.board.get({ boardId: board.id });
     expect(fetched.columns).toHaveLength(1);
     expect(fetched.columns[0].cards).toHaveLength(1);
 
-    const { boards } = await client.listBoards({});
+    const { boards } = await client.board.list({});
     expect(boards).toHaveLength(1);
 
-    await client.deleteCard({
+    await client.card.delete({
       boardId: board.id,
       columnId: col.id,
       cardId: card.id,
     });
-    const afterDelete = await client.getBoard({ boardId: board.id });
+    const afterDelete = await client.board.get({ boardId: board.id });
     expect(afterDelete.columns[0].cards).toHaveLength(0);
 
-    await client.deleteColumn({ boardId: board.id, columnId: col.id });
-    const afterColDelete = await client.getBoard({ boardId: board.id });
+    await client.column.delete({ boardId: board.id, columnId: col.id });
+    const afterColDelete = await client.board.get({ boardId: board.id });
     expect(afterColDelete.columns).toHaveLength(0);
 
-    const result = await client.deleteBoard({ boardId: board.id });
+    const result = await client.board.delete({ boardId: board.id });
     expect(result.success).toBe(true);
   });
 
   it("moves cards between columns through the client", async () => {
     const { client } = createKanbanApi();
 
-    const board = await client.createBoard({ title: "Kanban" });
-    const todo = await client.createColumn({ boardId: board.id, title: "To Do" });
-    const done = await client.createColumn({ boardId: board.id, title: "Done" });
-    const card = await client.createCard({
+    const board = await client.board.create({ title: "Kanban" });
+    const todo = await client.column.create({ boardId: board.id, title: "To Do" });
+    const done = await client.column.create({ boardId: board.id, title: "Done" });
+    const card = await client.card.create({
       boardId: board.id,
       columnId: todo.id,
       title: "Task A",
     });
 
-    const moved = await client.moveCard({
+    const moved = await client.card.move({
       boardId: board.id,
       sourceColumnId: todo.id,
       targetColumnId: done.id,
@@ -309,14 +309,14 @@ describe("createKanbanApi (client)", () => {
     });
     expect(moved.title).toBe("Task A");
 
-    const updatedBoard = await client.getBoard({ boardId: board.id });
+    const updatedBoard = await client.board.get({ boardId: board.id });
     expect(updatedBoard.columns[0].cards).toHaveLength(0);
     expect(updatedBoard.columns[1].cards).toHaveLength(1);
   });
 
   it("validates input through the client (rejects bad data)", async () => {
     const { client } = createKanbanApi();
-    await expect(client.createBoard({ title: "" })).rejects.toThrow();
+    await expect(client.board.create({ title: "" })).rejects.toThrow();
   });
 
   it("self-documents via router.describe()", () => {
@@ -324,14 +324,14 @@ describe("createKanbanApi (client)", () => {
     const desc = router.describe();
     expect(desc.procedures.length).toBeGreaterThanOrEqual(10);
 
-    const names = desc.procedures.map((p) => p.name);
-    expect(names).toContain("createBoard");
-    expect(names).toContain("getBoard");
-    expect(names).toContain("createCard");
-    expect(names).toContain("moveCard");
+    const ids = desc.procedures.map((p) => p.id);
+    expect(ids).toContain("board.create");
+    expect(ids).toContain("board.get");
+    expect(ids).toContain("card.create");
+    expect(ids).toContain("card.move");
 
     for (const proc of desc.procedures) {
-      expect(proc.description).toBeTruthy();
+      expect(proc.meta.description).toBeTruthy();
       expect(proc.inputSchema).toBeDefined();
       expect(proc.outputSchema).toBeDefined();
     }
@@ -342,7 +342,7 @@ describe("createKanbanApi (client)", () => {
     store.createBoard("Pre-existing");
     const { client } = createKanbanApi(store);
 
-    const { boards } = await client.listBoards({});
+    const { boards } = await client.board.list({});
     expect(boards).toHaveLength(1);
     expect(boards[0].title).toBe("Pre-existing");
   });

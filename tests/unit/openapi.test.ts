@@ -21,19 +21,19 @@ describe("OpenAPI Generation", () => {
   it("generates paths for all procedures", () => {
     const spec = generateOpenApiSpec(router);
     const paths = Object.keys(spec.paths);
-    expect(paths).toContain("/api/call/createBoard");
-    expect(paths).toContain("/api/call/getBoard");
-    expect(paths).toContain("/api/call/moveCard");
+    expect(paths).toContain("/api/call/board.create");
+    expect(paths).toContain("/api/call/board.get");
+    expect(paths).toContain("/api/call/card.move");
     expect(paths.length).toBe(11);
   });
 
   it("includes request/response schemas for each endpoint", () => {
     const spec = generateOpenApiSpec(router);
-    const createBoard = spec.paths["/api/call/createBoard"].post;
-    expect(createBoard.operationId).toBe("createBoard");
+    const createBoard = spec.paths["/api/call/board.create"].post;
+    expect(createBoard.operationId).toBe("board.create");
     expect(createBoard.summary).toBe("Create a new kanban board");
     expect(createBoard.requestBody.content["application/json"].schema.$ref).toContain(
-      "CreateBoardInput",
+      "BoardCreateInput",
     );
     expect(createBoard.responses["200"]).toBeDefined();
     expect(createBoard.responses["400"]).toBeDefined();
@@ -42,7 +42,7 @@ describe("OpenAPI Generation", () => {
   it("generates component schemas with correct types", () => {
     const spec = generateOpenApiSpec(router);
     const schemas = spec.components.schemas;
-    expect(schemas.CreateBoardInput).toEqual({
+    expect(schemas.BoardCreateInput).toEqual({
       type: "object",
       properties: { title: { type: "string" } },
       required: ["title"],
@@ -66,14 +66,14 @@ describe("AsyncAPI Generation", () => {
   it("generates channels for all procedures", () => {
     const spec = generateAsyncApiSpec(router);
     const channels = Object.keys(spec.channels);
-    expect(channels).toContain("createBoard");
-    expect(channels).toContain("moveCard");
+    expect(channels).toContain("board.create");
+    expect(channels).toContain("card.move");
     expect(channels.length).toBe(11);
   });
 
   it("includes publish/subscribe messages", () => {
     const spec = generateAsyncApiSpec(router);
-    const createBoard = spec.channels.createBoard;
+    const createBoard = spec.channels["board.create"];
     expect(createBoard.publish.message.payload).toBeDefined();
     expect(createBoard.subscribe.message.payload).toBeDefined();
   });

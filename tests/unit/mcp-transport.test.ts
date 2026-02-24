@@ -71,9 +71,9 @@ describe("MCP Transport", () => {
     });
     expect(resp.result.tools).toBeDefined();
     const names = resp.result.tools.map((t: any) => t.name);
-    expect(names).toContain("createBoard");
-    expect(names).toContain("getBoard");
-    expect(names).toContain("moveCard");
+    expect(names).toContain("board.create");
+    expect(names).toContain("board.get");
+    expect(names).toContain("card.move");
   });
 
   it("calls a tool successfully", async () => {
@@ -81,7 +81,7 @@ describe("MCP Transport", () => {
       jsonrpc: "2.0",
       id: 3,
       method: "tools/call",
-      params: { name: "createBoard", arguments: { title: "MCP Board" } },
+      params: { name: "board.create", arguments: { title: "MCP Board" } },
     });
     expect(resp.result.content).toBeDefined();
     const text = resp.result.content[0].text;
@@ -115,7 +115,7 @@ describe("MCP Transport", () => {
       id: 6,
       method: "tools/list",
     });
-    const createBoard = resp.result.tools.find((t: any) => t.name === "createBoard");
+    const createBoard = resp.result.tools.find((t: any) => t.name === "board.create");
     expect(createBoard.inputSchema.type).toBe("object");
     expect(createBoard.inputSchema.properties.title.type).toBe("string");
     expect(createBoard.inputSchema.required).toContain("title");

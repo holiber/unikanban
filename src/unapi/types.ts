@@ -20,11 +20,11 @@ export type AnyProcedure = ProcedureDefinition<z.ZodType, z.ZodType>;
 export type RouterShape = Record<string, AnyProcedure>;
 
 export interface ProcedureInfo {
-  name: string;
-  description: string;
-  tags: string[];
+  id: string;
+  meta: ProcedureMeta;
   inputSchema: z.ZodType;
   outputSchema: z.ZodType;
+  aliases?: string[];
 }
 
 export interface RouterDescription {
@@ -42,3 +42,43 @@ export type InferOutput<P> = P extends ProcedureDefinition<any, infer O>
 export type ClientShape<T extends RouterShape> = {
   [K in keyof T]: (input: InferInput<T[K]>) => Promise<InferOutput<T[K]>>;
 };
+
+export type FlatClientShape<T extends RouterShape> = {
+  [K in keyof T & string]: (input: InferInput<T[K]>) => Promise<InferOutput<T[K]>>;
+};
+
+type UnionToIntersection<U> = (
+  U extends unknown ? (k: U) => void : never
+) extends (k: infer I) => void
+  ? I
+  : never;
+
+type Split<S extends string, D extends string> = string extends S
+  ? string[]
+  : S extends ""
+    ? []
+    : S extends `${infer T}${D}${infer U}`
+      ? [T, ...Split<U, D>]
+      : [S];
+
+type BuildNestedClient<Path extends readonly string[], Fn> = Path extends [
+  infer Head extends string,
+  ...infer Tail extends string[],
+]
+  ? Tail["length"] extends 0
+    ? { [K in Head]: Fn }
+    : { [K in Head]: BuildNestedClient<Tail, Fn> }
+  : never;
+
+export type NestedClientShape<T extends RouterShape> = UnionToIntersection<
+  {
+    [K in keyof T & string]: BuildNestedClient<
+      Split<K, ".">,
+      (input: InferInput<T[K]>) => Promise<InferOutput<T[K]>>
+    >;
+  }[keyof T & string]
+>;
+
+export type UnapiClient<T extends RouterShape> = NestedClientShape<T> &
+  FlatClientShape<T> &
+  Record<string, (input: unknown) => Promise<unknown>>;
