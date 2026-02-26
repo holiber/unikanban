@@ -1,6 +1,8 @@
 import type { Router, RouterShape } from "../unapi/index.js";
 import { createInterface } from "node:readline";
 import type { Readable, Writable } from "node:stream";
+import type { ProcedureFilter } from "./rpc-bridge.js";
+import { createRpcBridge } from "./rpc-bridge.js";
 
 export interface StdioMessage {
   id: string | number;
@@ -17,6 +19,7 @@ export interface StdioResponse {
 export interface StdioTransportOptions {
   input?: Readable;
   output?: Writable;
+  procedures?: ProcedureFilter;
 }
 
 export function createStdioTransport<T extends RouterShape>(
@@ -25,6 +28,7 @@ export function createStdioTransport<T extends RouterShape>(
 ) {
   const input = options?.input ?? process.stdin;
   const output = options?.output ?? process.stdout;
+  const bridge = createRpcBridge(router, { procedures: options?.procedures });
 
   function send(response: StdioResponse) {
     output.write(JSON.stringify(response) + "\n");
@@ -38,31 +42,8 @@ export function createStdioTransport<T extends RouterShape>(
       send({ id: 0, error: { message: "Invalid JSON", code: -32700 } });
       return;
     }
-
-    if (msg.method === "describe") {
-      send({ id: msg.id, result: router.describe() });
-      return;
-    }
-
-    if (msg.method === "list") {
-      send({ id: msg.id, result: { procedures: router.procedureNames } });
-      return;
-    }
-
-    if (!router.procedureNames.includes(msg.method as any)) {
-      send({
-        id: msg.id,
-        error: { message: `Unknown procedure: ${msg.method}`, code: -32601 },
-      });
-      return;
-    }
-
-    try {
-      const result = await router.call(msg.method as any, (msg.params ?? {}) as any);
-      send({ id: msg.id, result });
-    } catch (err: any) {
-      send({ id: msg.id, error: { message: err.message, code: -32000 } });
-    }
+    const resp = await bridge.handleRequest(msg);
+    send(resp);
   }
 
   const rl = createInterface({ input, terminal: false });
@@ -78,4 +59,11 @@ export function createStdioTransport<T extends RouterShape>(
   }
 
   return { start, stop, handleMessage };
+}
+
+export function exposeViaStdio<T extends RouterShape>(
+  router: Router<T>,
+  options?: StdioTransportOptions,
+) {
+  return createStdioTransport(router, options);
 }
