@@ -23,8 +23,8 @@ export function createCli<T extends RouterShape>(
   },
 ) {
   const desc = router.describe();
-  const writeOut = options?.writeOut ?? ((text: string) => process.stdout.write(text + "\n"));
-  const writeErr = options?.writeErr ?? ((text: string) => process.stderr.write(text + "\n"));
+  const writeOut = options?.writeOut;
+  const writeErr = options?.writeErr;
   const exitOnError = options?.exitOnError ?? true;
 
   let cli = yargs(hideBin(process.argv))
@@ -75,7 +75,7 @@ function registerNode<T extends RouterShape>(
   segment: string,
   node: TrieNode,
   callOverride?: (procedureId: string, input: Record<string, any>) => Promise<any>,
-  io?: { writeOut: (text: string) => void; writeErr: (text: string) => void; exitOnError: boolean },
+  io?: { writeOut?: (text: string) => void; writeErr?: (text: string) => void; exitOnError: boolean },
 ): any {
   const hasChildren = node.children.size > 0;
   const isLeaf = Boolean(node.proc);
@@ -110,7 +110,7 @@ function registerLeaf<T extends RouterShape>(
   command: string,
   proc: ProcDesc,
   callOverride?: (procedureId: string, input: Record<string, any>) => Promise<any>,
-  io?: { writeOut: (text: string) => void; writeErr: (text: string) => void; exitOnError: boolean },
+  io?: { writeOut?: (text: string) => void; writeErr?: (text: string) => void; exitOnError: boolean },
 ): any {
   const procedure = router.procedures[proc.id as keyof T];
   const fields = extractFields(procedure.input);
@@ -148,9 +148,11 @@ function registerLeaf<T extends RouterShape>(
       }
       try {
         const result = await call(proc.id, input);
-        (io?.writeOut ?? console.log)(JSON.stringify(result, null, 2));
+        if (io?.writeOut) io.writeOut(JSON.stringify(result, null, 2));
+        else console.log(JSON.stringify(result, null, 2));
       } catch (err: any) {
-        (io?.writeErr ?? console.error)(`Error: ${err.message}`);
+        if (io?.writeErr) io.writeErr(`Error: ${err.message}`);
+        else console.error(`Error: ${err.message}`);
         if (io?.exitOnError ?? true) {
           process.exit(1);
         }

@@ -152,21 +152,26 @@ export async function runInteractiveCli<T extends RouterShape>(
   rl.prompt();
 
   await new Promise<void>((resolve) => {
-    rl.on("line", async (line) => {
+    let closed = false;
+    let queue = Promise.resolve();
+
+    const handleLine = async (line: string) => {
+      if (closed) return;
       const trimmed = line.trim();
       if (!trimmed) {
-        rl.prompt();
+        if (!closed) rl.prompt();
         return;
       }
 
       if (trimmed === ".exit" || trimmed === "exit" || trimmed === "quit") {
+        closed = true;
         rl.close();
         return;
       }
 
       if (trimmed === ".help" || trimmed === "help") {
         printHelp();
-        rl.prompt();
+        if (!closed) rl.prompt();
         return;
       }
 
@@ -178,7 +183,7 @@ export async function runInteractiveCli<T extends RouterShape>(
         else if (sub === "on") subscribe(name);
         else if (sub === "off") unsubscribe(name);
         else writeOut("Usage: .events <list|on|off> [name]");
-        rl.prompt();
+        if (!closed) rl.prompt();
         return;
       }
 
@@ -188,13 +193,18 @@ export async function runInteractiveCli<T extends RouterShape>(
       } catch (err: any) {
         writeErr(`Error: ${err?.message ?? String(err)}`);
       } finally {
-        rl.prompt();
+        if (!closed) rl.prompt();
       }
+    };
+
+    rl.on("line", (line) => {
+      queue = queue.then(() => handleLine(line));
     });
 
     rl.on("close", () => {
+      closed = true;
       unsubscribe();
-      resolve();
+      queue.finally(() => resolve());
     });
   });
 }
