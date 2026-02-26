@@ -136,7 +136,7 @@ console.log(`Writing CLI/TUI artifacts into: ${pwOutDir}`);
 
 // CLI: help output
 {
-  const { output } = await runCmd("pnpm", ["run", "--silent", "cli", "--", "--help"], {
+  const { output } = await runCmd("node", ["--import", "tsx", "src/cli/main.ts", "--help"], {
     env: { FORCE_COLOR: "0" },
     timeoutMs: 10_000,
   });
@@ -158,11 +158,15 @@ console.log(`Writing CLI/TUI artifacts into: ${pwOutDir}`);
     "",
   ].join("\n");
 
-  const { output } = await runCmd("pnpm", ["run", "--silent", "cli", "--", "--interactive"], {
+  const { output } = await runCmd(
+    "node",
+    ["--import", "tsx", "src/cli/main.ts", "--interactive"],
+    {
     env: { FORCE_COLOR: "0" },
     timeoutMs: 15_000,
     stdin,
-  });
+    },
+  );
   const txtPath = join(cliDir, "interactive.txt");
   const pngPath = join(cliDir, "interactive.png");
   writeFileSync(txtPath, output);
@@ -171,8 +175,8 @@ console.log(`Writing CLI/TUI artifacts into: ${pwOutDir}`);
 
 // TUI: capture initial render (best-effort; Ink may warn without a TTY)
 {
-  const { output } = await runCmd("pnpm", ["run", "--silent", "dev:tui"], {
-    env: { FORCE_COLOR: "0" },
+  const { output } = await runCmd("node", ["--import", "tsx", "src/tui/main.tsx"], {
+    env: { FORCE_COLOR: "0", TSX_TSCONFIG_PATH: "tsconfig.tui.json" },
     timeoutMs: 2_000,
   });
   const txtPath = join(tuiDir, "render.txt");
