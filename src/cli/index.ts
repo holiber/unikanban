@@ -16,9 +16,17 @@ export function createCli<T extends RouterShape>(
     scriptName?: string;
     version?: string;
     call?: (procedureId: string, input: Record<string, any>) => Promise<any>;
+    exitProcess?: boolean;
+    exitOnError?: boolean;
+    writeOut?: (text: string) => void;
+    writeErr?: (text: string) => void;
   },
 ) {
   const desc = router.describe();
+  const writeOut = options?.writeOut ?? ((text: string) => process.stdout.write(text + "\n"));
+  const writeErr = options?.writeErr ?? ((text: string) => process.stderr.write(text + "\n"));
+  const exitOnError = options?.exitOnError ?? true;
+
   let cli = yargs(hideBin(process.argv))
     .scriptName(options?.scriptName ?? "unikanban")
     .version(options?.version ?? "0.1.0")
@@ -26,10 +34,17 @@ export function createCli<T extends RouterShape>(
 
   const root = buildTrie(desc.procedures);
   for (const [seg, node] of root.children) {
-    cli = registerNode(cli, router, seg, node, options?.call) as any;
+    cli = registerNode(cli, router, seg, node, options?.call, {
+      writeOut,
+      writeErr,
+      exitOnError,
+    }) as any;
   }
 
-  cli = cli.demandCommand(1, "Please specify a command").strict();
+  cli = cli
+    .exitProcess(options?.exitProcess ?? true)
+    .demandCommand(1, "Please specify a command")
+    .strict();
 
   return cli;
 }
@@ -60,12 +75,13 @@ function registerNode<T extends RouterShape>(
   segment: string,
   node: TrieNode,
   callOverride?: (procedureId: string, input: Record<string, any>) => Promise<any>,
+  io?: { writeOut: (text: string) => void; writeErr: (text: string) => void; exitOnError: boolean },
 ): any {
   const hasChildren = node.children.size > 0;
   const isLeaf = Boolean(node.proc);
 
   if (isLeaf && !hasChildren) {
-    return registerLeaf(y, router, segment, node.proc!, callOverride);
+    return registerLeaf(y, router, segment, node.proc!, callOverride, io);
   }
 
   // Group / namespace node (supports `board create`, `admin user create`, etc.)
@@ -74,12 +90,12 @@ function registerNode<T extends RouterShape>(
     `Commands under ${segment}`,
     (yy: any) => {
       for (const [childSeg, childNode] of node.children) {
-        registerNode(yy, router, childSeg, childNode, callOverride);
+        registerNode(yy, router, childSeg, childNode, callOverride, io);
       }
 
       if (isLeaf) {
         // If a procedure ends at this node, expose it as `segment call`.
-        registerLeaf(yy, router, "call", node.proc!, callOverride);
+        registerLeaf(yy, router, "call", node.proc!, callOverride, io);
       }
 
       return yy.demandCommand(1, "Please specify a command").strict();
@@ -94,6 +110,7 @@ function registerLeaf<T extends RouterShape>(
   command: string,
   proc: ProcDesc,
   callOverride?: (procedureId: string, input: Record<string, any>) => Promise<any>,
+  io?: { writeOut: (text: string) => void; writeErr: (text: string) => void; exitOnError: boolean },
 ): any {
   const procedure = router.procedures[proc.id as keyof T];
   const fields = extractFields(procedure.input);
@@ -131,10 +148,12 @@ function registerLeaf<T extends RouterShape>(
       }
       try {
         const result = await call(proc.id, input);
-        console.log(JSON.stringify(result, null, 2));
+        (io?.writeOut ?? console.log)(JSON.stringify(result, null, 2));
       } catch (err: any) {
-        console.error(`Error: ${err.message}`);
-        process.exit(1);
+        (io?.writeErr ?? console.error)(`Error: ${err.message}`);
+        if (io?.exitOnError ?? true) {
+          process.exit(1);
+        }
       }
     },
   );

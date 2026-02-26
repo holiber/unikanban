@@ -46,6 +46,9 @@ jobs:
       - name: Scenario tests (generate recordings)
         run: RECORDINGS=1 pnpm test:scenario
 
+      - name: Generate CLI/TUI screenshots (recordings)
+        run: pnpm build:cli-tui-artifacts
+
       - name: Build library
         run: pnpm build
 

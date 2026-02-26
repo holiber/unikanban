@@ -19,6 +19,18 @@ export type KanbanEvents = {
   };
 };
 
+export const KANBAN_EVENT_NAMES = [
+  "board:created",
+  "board:deleted",
+  "column:created",
+  "column:updated",
+  "column:deleted",
+  "card:created",
+  "card:updated",
+  "card:deleted",
+  "card:moved",
+] as const satisfies readonly (keyof KanbanEvents)[];
+
 let nextId = 1;
 function generateId(): string {
   return `id-${nextId++}`;
