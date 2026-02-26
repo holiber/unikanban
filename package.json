@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "dev:tui": "node --import tsx src/tui/main.tsx",
+    "dev:tui": "TSX_TSCONFIG_PATH=tsconfig.tui.json node --import tsx src/tui/main.tsx",
     "cli": "node --import tsx src/cli/main.ts",
     "mcp": "node --import tsx src/transports/mcp-main.ts",
     "http": "node --import tsx src/transports/http-main.ts",
