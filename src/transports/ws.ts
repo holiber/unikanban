@@ -7,7 +7,7 @@ import type {
   RpcResponse,
 } from "./rpc-bridge.js";
 import { createRpcBridge } from "./rpc-bridge.js";
-import WebSocket, { WebSocketServer } from "ws";
+import WebSocket, { WebSocketServer, type RawData } from "ws";
 
 export interface WsServerOptions {
   port?: number;
@@ -31,8 +31,8 @@ export function createWsServer<T extends RouterShape>(
     ws.send(JSON.stringify(resp));
   }
 
-  wss.on("connection", (ws) => {
-    ws.on("message", async (data) => {
+  wss.on("connection", (ws: WebSocket) => {
+    ws.on("message", async (data: RawData) => {
       const raw = typeof data === "string" ? data : data.toString();
       let msg: RpcRequest;
       try {
@@ -62,7 +62,7 @@ export function createWsServer<T extends RouterShape>(
       }),
     stop: () =>
       new Promise<void>((resolve, reject) => {
-        wss.close((err) => (err ? reject(err) : resolve()));
+        wss.close((err?: Error) => (err ? reject(err) : resolve()));
       }),
     get address() {
       try {
@@ -100,10 +100,10 @@ export function createWsCaller(options: WsClientOptions): WsCaller {
 
   const opened = new Promise<void>((resolve, reject) => {
     ws.once("open", () => resolve());
-    ws.once("error", (err) => reject(err as Error));
+    ws.once("error", (err: Error) => reject(err));
   });
 
-  ws.on("message", (data) => {
+  ws.on("message", (data: RawData) => {
     const raw = typeof data === "string" ? data : data.toString();
     let resp: RpcResponse;
     try {
